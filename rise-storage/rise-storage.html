@@ -1,0 +1,90 @@
+<link rel="import" href="/components/polymer/polymer.html">
+<link rel="import" href="/components/core-ajax/core-ajax.html">
+
+<!--
+The `rise-storage` element retrieves URLs of files stored in Rise Storage.
+
+    <rise-storage
+      companyId="my-company-id"
+      folder="my-folder"
+      fileName="my-image.png"
+      folderRefresh="60"></rise-storage>
+
+You can trigger a request explicitly by calling `go` on the
+element.
+
+@element rise-storage
+@status alpha
+@homepage https://github.com/Rise-Vision/web-component-rise-storage
+-->
+<polymer-element name="rise-storage" attributes="companyId folder fileName folderRefresh">
+  <template>
+    <core-ajax id="ajax" url="{{url}}" handleAs="json" auto response="{{resp}}"></core-ajax>
+  </template>
+
+  <script>
+    Polymer("rise-storage", {
+      /**
+       * Fired when a response is received.
+       *
+       * @event rise-storage-response
+       */
+
+      /**
+       * Fired when an error is received.
+       *
+       * @event rise-storage-error
+       */
+
+      /**
+       * The ID of the Company.
+       *
+       * @attribute companyId
+       * @type string
+       * @default ""
+       */
+      companyId: "",
+
+      /**
+       * The folder name.
+       *
+       * @attribute folder
+       * @type string
+       * @default ""
+       */
+      folder: "",
+
+      /**
+       * The file name within the folder.
+       *
+       * @attribute fileName
+       * @type string
+       * @default ""
+       */
+      fileName: "",
+
+      /**
+       * The number of seconds before the folder will be checked for changes.
+
+       *
+       * @attribute folderRefresh
+       * @type number
+       * @default 0
+       */
+      folderRefresh: 0,
+
+      ready: function() {
+        this.$.ajax.url = "";
+      },
+
+      /**
+       * Performs an Ajax request to the specified URL.
+       *
+       * @method go
+       */
+      go: function() {
+
+      }
+    });
+  </script>
+</polymer-element>
