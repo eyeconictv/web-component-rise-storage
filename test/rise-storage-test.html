@@ -23,14 +23,110 @@
 <body>
 
   <!-- You use the document as a place to set up your fixtures. -->
-  <rise-storage company-id="my-company-id" folder="my-folder" file-name="my-image.png"></rise-storage>
+  <rise-storage id="storage1"></rise-storage>
+  <rise-storage id="storage2" companyId="abc123"></rise-storage>
+  <rise-storage id="storage3" companyId="abc123" folder="my-folder"></rise-storage>
+  <rise-storage id="storage4" companyId="abc123" fileName="my-image.png"></rise-storage>
+  <rise-storage id="storage5" companyId="abc123" folder="my-folder" fileName="my-image.png"></rise-storage>
 
   <script>
-    var storage = document.querySelector("rise-storage");
+    suite("rise-storage", function() {
+      var storage = document.querySelector("#storage1"),
+        storage2 = document.querySelector("#storage2"),
+        storage3 = document.querySelector("#storage3"),
+        storage4 = document.querySelector("#storage4"),
+        storage5 = document.querySelector("#storage5"),
+        xhr, requests;
 
-    suite("<rise-storage>", function() {
+      suiteSetup(function() {
+        xhr = sinon.useFakeXMLHttpRequest();
+
+        xhr.onCreate = function (xhr) {
+          requests.push(xhr);
+        };
+      });
+
+      suiteTeardown(function() {
+        xhr.restore();
+      })
+
+      setup(function() {
+        requests = [];
+      });
+
+      suite("defaults", function() {
+        test("defaults", function() {
+          assert.equal(storage.companyId, "");
+          assert.equal(storage.folder, "");
+          assert.equal(storage.fileName, "");
+          assert.equal(storage.folderRefresh, 0);
+
+          assert.equal(storage.url, "");
+          assert.equal(storage2.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o");
+          assert.equal(storage3.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=/&prefix=my-folder/");
+          assert.equal(storage4.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/my-image.png?alt=media");
+          assert.equal(storage5.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/my-folder/my-image.png?alt=media");
+        });
+      });
+
+      suite("events", function() {
+        var headers = {
+            "Content-Type": "text/json"
+          },
+          body = {
+            "items": [{
+              "mediaLink": "http://url.to.my-image.png"
+            }]
+          },
+          responded = false;
+
+        suite("rise-storage-response", function() {
+          test("rise-storage-response should be fired on success", function(done) {
+            storage2.addEventListener("rise-storage-response", function(response) {
+              assert.equal(response.length, 1);
+              responded = true;
+            });
+
+            requests[0].respond(200, headers, body);
+            assert.isTrue(responded);
+            done();
+          });
+
+          test("rise-storage-response should not be fired on failure", function(done) {
+            storage2.addEventListener("rise-storage-response", function(response) {
+              responded = true;
+            });
+
+            requests[0].respond(404, headers, body);
+            assert.isFalse(responded);
+            done();
+          });
+        });
+
+        suite("rise-storage-error", function() {
+          test("rise-storage-error should be fired on failure", function(done) {
+            storage2.addEventListener("rise-storage-error", function(response) {
+              responded = true;
+            });
+
+            requests[0].respond(404, headers, body);
+            assert.isTrue(responded);
+            done();
+          });
+          test("rise-storage-error should not be fired on success", function(done) {
+            var responded = false;
+
+            storage2.addEventListener("rise-storage-error", function(response) {
+              responded = true;
+            });
+
+            requests[0].respond(200, headers, body);
+            assert.isFalse(responded);
+            done();
+          });
+        });
+      });
     });
   </script>
-
 </body>
 </html>

@@ -19,7 +19,13 @@ element.
 -->
 <polymer-element name="rise-storage" attributes="companyId folder fileName folderRefresh">
   <template>
-    <core-ajax id="ajax" url="{{url}}" handleAs="json" auto response="{{resp}}"></core-ajax>
+    <core-ajax id="ajax"
+      url="{{url}}"
+      handleAs="json"
+      on-core-response="{{handleResponse}}"
+      on-core-error="{{handleError}}"
+      auto>
+    </core-ajax>
   </template>
 
   <script>
@@ -73,8 +79,40 @@ element.
        */
       folderRefresh: 0,
 
+      /**
+       * The URL target of the request.
+       *
+       * @property url
+       * @type string
+       * @default ''
+       */
+      url: "",
+
       ready: function() {
-        this.$.ajax.url = "";
+        // TODO: Set url on core-ajax element.
+      },
+
+      companyIdChanged: function() {
+        this.go();
+      },
+
+      folderChanged: function() {
+        this.go();
+      },
+
+      fileNameChanged: function() {
+        this.go();
+      },
+
+      handleResponse: function(e, detail, sender) {
+        // TODO: Send back array of URLs.
+        this.fire("rise-storage-response", []);
+      },
+
+      handleError: function(e, detail, sender){
+        console.log("Error:", e.detail);
+
+        this.fire("rise-storage-error", e)
       },
 
       /**
@@ -83,7 +121,7 @@ element.
        * @method go
        */
       go: function() {
-
+        this.$.ajax.go();
       }
     });
   </script>
