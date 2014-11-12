@@ -6,7 +6,7 @@
   "dependencies": {
     "core-elements": "Polymer/core-elements#~0.5.0",
     "polymer": "Polymer/polymer#~0.5.0",
-    "webcomponents.js": "polymer/webcomponentsjs#~0.4.2"
+    "webcomponents.js": "polymer/webcomponentsjs#^0.5.0"
   },
   "devDependencies": {
     "web-component-tester": "polymer/web-component-tester#~1.5.1"
