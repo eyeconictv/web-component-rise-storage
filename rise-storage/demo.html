@@ -11,8 +11,17 @@
 <body unresolved>
 
   <p>A `rise-storage` looks like this:</p>
+  <rise-storage companyId="f5d57a6d-0a59-4610-89ae-b40093f7762d" folder="Test" fileName="Brooke.jpg"></rise-storage>
+  <img id="storage-image" src="" />
 
-  <rise-storage></rise-storage>
+  <script>
+    var storage = document.querySelector("rise-storage"),
+      image = document.querySelector("#storage-image");
+
+    storage.addEventListener("rise-storage-response", function(e) {
+      image.setAttribute("src", e.detail[0]);
+    });
+  </script>
 
 </body>
 </html>
