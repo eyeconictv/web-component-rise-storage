@@ -4,7 +4,7 @@
 
 The Rise Storage Web Component uses Google’s storage API to retrieve the URLs of all files in a particular folder, or the URL of a single file in a particular folder, from Rise Storage.
 
-See the [component page](https://github.com/Rise-Vision/web-component-rise-storage) for more information.
+See the [component page](http://rise-vision.github.io/web-component-rise-storage/components/web-component-rise-storage/rise-storage/) for more information.
 
 Rise Storage Web Component works in conjunction with [Rise Vision](http://www.risevision.com), the [digital signage management application](http://rva.risevision.com/) that runs on [Google Cloud](https://cloud.google.com).
 

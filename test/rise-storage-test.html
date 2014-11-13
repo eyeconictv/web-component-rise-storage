@@ -24,8 +24,8 @@
 
   <rise-storage id="storage1"></rise-storage>
   <rise-storage id="storage2" companyId="abc123"></rise-storage>
-  <rise-storage id="storage3" companyId="abc123" folder="my-folder"></rise-storage>
-  <rise-storage id="storage4" companyId="abc123" fileName="my-image.png"></rise-storage>
+  <rise-storage id="storage3" companyId="abc123" folder="my-folder" folderRefresh="10"></rise-storage>
+  <rise-storage id="storage4" companyId="abc123" fileName="my-image.png" folderRefresh="10"></rise-storage>
   <rise-storage id="storage5" companyId="abc123" folder="my-folder" fileName="my-image.png"></rise-storage>
 
   <script>
@@ -197,6 +197,7 @@
             assert.isTrue(responded);
             done();
           });
+
           test("should not fire rise-storage-error on success", function(done) {
             storage2.addEventListener("rise-storage-error", function(response) {
               responded = true;
@@ -207,6 +208,37 @@
             assert.isFalse(responded);
             done();
           });
+        });
+      });
+
+      suite("refresh", function() {
+        var clock;
+
+        suiteSetup(function() {
+          clock = sinon.useFakeTimers();
+        });
+
+        suiteTeardown(function() {
+          clock.restore();
+        });
+
+        test("should check for changes to a folder", function() {
+          var spy = sinon.spy(storage3, "go");
+
+          storage3.startTimer();
+          clock.tick(9999);
+          assert(spy.notCalled);
+
+          clock.tick(1);
+          assert(spy.calledOnce);
+        });
+
+        test("should not check for changes to a file", function() {
+          var spy = sinon.spy(storage4, "go");
+
+          storage4.startTimer(spy);
+          clock.tick(10000);
+          assert(spy.notCalled);
         });
       });
 

@@ -103,12 +103,12 @@ element.
             if (this.fileName) {
               url += "?delimiter=/&prefix=" + encodeURIComponent(this.folder) + "/" + encodeURIComponent(this.fileName);
             }
+            // Get all files in a specific folder.
             else {
-              // Get all files in a specific folder.
               url += "?delimiter=/&prefix=" + encodeURIComponent(this.folder) + "/";
             }
           }
-          // Get a specific file in the root folder.
+          // Get a specific file in a bucket.
           else if (this.fileName) {
             url += "/" + encodeURIComponent(this.fileName);
           }
@@ -116,7 +116,21 @@ element.
           this.url = url;
         }
 
-        // TODO: Implement folderRefresh.
+        this.startTimer();
+      },
+
+      startTimer: function() {
+        // Don't refresh individual files.
+        if (!this.fileName) {
+          this.folderRefresh = parseInt(this.folderRefresh, 10);
+
+          if (!isNaN(this.folderRefresh) && this.folderRefresh !== 0) {
+            this.job("refresh", function() {
+              this.go();
+              this.startTimer();
+            }, this.folderRefresh * 1000);
+          }
+        }
       },
 
       companyIdChanged: function() {
@@ -152,7 +166,7 @@ element.
         this.fire("rise-storage-response", urls);
       },
 
-      handleError: function(e, resp){
+      handleError: function(e, resp) {
         console.log("Error: " + resp.xhr.status + " " + resp.xhr.statusText);
 
         this.fire("rise-storage-error", resp);
