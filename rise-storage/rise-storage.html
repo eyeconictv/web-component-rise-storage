@@ -89,30 +89,73 @@ element.
       url: "",
 
       ready: function() {
-        // TODO: Set url on core-ajax element.
+        this.setUrl();
+      },
+
+      setUrl: function() {
+        var url = "";
+
+        if (this.companyId) {
+          url = "https://www.googleapis.com/storage/v1/b/risemedialibrary-" + encodeURIComponent(this.companyId) + "/o";
+
+          if (this.folder) {
+            // Get a specific file in a specific folder.
+            if (this.fileName) {
+              url += "?delimiter=/&prefix=" + encodeURIComponent(this.folder) + "/" + encodeURIComponent(this.fileName);
+            }
+            else {
+              // Get all files in a specific folder.
+              url += "?delimiter=/&prefix=" + encodeURIComponent(this.folder) + "/";
+            }
+          }
+          // Get a specific file in the root folder.
+          else if (this.fileName) {
+            url += "/" + encodeURIComponent(this.fileName);
+          }
+
+          this.url = url;
+        }
+
+        // TODO: Implement folderRefresh.
       },
 
       companyIdChanged: function() {
-        this.go();
+        this.setUrl();
       },
 
       folderChanged: function() {
-        this.go();
+        this.setUrl();
       },
 
       fileNameChanged: function() {
-        this.go();
+        this.setUrl();
       },
 
-      handleResponse: function(e, detail, sender) {
-        // TODO: Send back array of URLs.
-        this.fire("rise-storage-response", []);
+      handleResponse: function(e, resp) {
+        var urls = [];
+
+        // Send back array of URLs.
+        if (resp && resp.response && resp.response.items) {
+          resp.response.items.forEach(function(elem, index) {
+            // Check that this is not the folder itself.
+            if (elem.contentType && elem.contentType !== "text/plain") {
+              if (elem.mediaLink) {
+                urls.push(elem.mediaLink);
+              }
+            }
+          });
+        }
+        else if (resp && resp.response && resp.response.mediaLink) {
+          urls.push(resp.response.mediaLink);
+        }
+
+        this.fire("rise-storage-response", urls);
       },
 
-      handleError: function(e, detail, sender){
-        console.log("Error:", e.detail);
+      handleError: function(e, resp){
+        console.log("Error: " + resp.xhr.status + " " + resp.xhr.statusText);
 
-        this.fire("rise-storage-error", e)
+        this.fire("rise-storage-error", resp);
       },
 
       /**
