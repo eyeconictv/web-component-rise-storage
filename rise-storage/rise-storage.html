@@ -1,5 +1,5 @@
-<link rel="import" href="../../components/polymer/polymer.html">
-<link rel="import" href="../../components/core-ajax/core-ajax.html">
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../core-ajax/core-ajax.html">
 
 <!--
 The `rise-storage` element retrieves URLs of files stored in Rise Storage.
@@ -57,6 +57,8 @@ You can trigger a request explicitly by calling `go` on the element.
   </template>
 
   <script>
+    /* global Polymer */
+    /*jshint newcap: false */
     Polymer("rise-storage", {
       /**
        * Fired when a response is received.
@@ -178,7 +180,7 @@ You can trigger a request explicitly by calling `go` on the element.
 
         // Send back array of URLs.
         if (resp && resp.response && resp.response.items) {
-          resp.response.items.forEach(function(elem, index) {
+          resp.response.items.forEach(function(elem) {
             // Check that this is not the folder itself.
             if (elem.contentType && elem.contentType !== "text/plain") {
               if (elem.mediaLink) {
