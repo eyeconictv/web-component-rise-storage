@@ -11,6 +11,7 @@ Rise Storage Web Component works in conjunction with [Rise Vision](http://www.ri
 At this time Chrome is the only browser that this project and Rise Vision supports.
 
 ## Built With
+- Polymer
 - Bower
 - Mocha and Chai for testing
 
