@@ -4,14 +4,42 @@
 <!--
 The `rise-storage` element retrieves URLs of files stored in Rise Storage.
 
-    <rise-storage
-      companyId="my-company-id"
-      folder="my-folder"
-      fileName="my-image.png"
-      folderRefresh="60"></rise-storage>
+To use it, first load `webcomponents.js`. Many browsers have yet to implement the various web components APIs. Until they do, `webcomponents.js` provides polyfill support. Be sure to include this file before any code that touches the DOM.
 
-You can trigger a request explicitly by calling `go` on the
-element.
+Next, load the element file using an HTML Import.
+
+For example:
+
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <script src="bower_components/webcomponentsjs/webcomponents.js"></script>
+        <link rel="import" href="bower_components/web-component-rise-storage/rise-storage/rise-storage.html">
+      </head>
+      <body>
+        <rise-storage
+          companyId="my-company-id"
+          folder="my-folder"
+          fileName="my-image.png"
+          folderRefresh="60"></rise-storage>
+
+        <script>
+          // Wait for 'polymer-ready'. Ensures the element is upgraded.
+          window.addEventListener('polymer-ready', function(e) {
+            var storage = document.querySelector('rise-storage');
+
+            // Respond to events it fires.
+            storage.addEventListener('rise-storage-response', function(e) {
+              console.log(e.detail[0]); // URL to the file.
+            });
+
+            storage.go(); // Call its API methods.
+          });
+        </script>
+      </body>
+    </html>
+
+You can trigger a request explicitly by calling `go` on the element.
 
 @element rise-storage
 @status alpha
@@ -47,7 +75,7 @@ element.
        *
        * @attribute companyId
        * @type string
-       * @default ""
+       * @default ''
        */
       companyId: "",
 
@@ -56,7 +84,7 @@ element.
        *
        * @attribute folder
        * @type string
-       * @default ""
+       * @default ''
        */
       folder: "",
 
@@ -65,7 +93,7 @@ element.
        *
        * @attribute fileName
        * @type string
-       * @default ""
+       * @default ''
        */
       fileName: "",
 
@@ -75,7 +103,7 @@ element.
        *
        * @attribute folderRefresh
        * @type number
-       * @default 0
+       * @default 0 (no refresh)
        */
       folderRefresh: 0,
 
