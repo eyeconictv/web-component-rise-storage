@@ -4,9 +4,8 @@
   "keywords": "polymer, web-components",
   "main": "rise-storage.html",
   "dependencies": {
-    "core-elements": "Polymer/core-elements#~0.5.1",
-    "polymer": "Polymer/polymer#~0.5.1",
-    "webcomponents.js": "polymer/webcomponentsjs#^0.5.1"
+    "core-ajax": "Polymer/core-ajax#~0.5.1",
+    "polymer": "Polymer/polymer#~0.5.1"
   },
   "devDependencies": {
     "web-component-tester": "polymer/web-component-tester#~1.5.1"
