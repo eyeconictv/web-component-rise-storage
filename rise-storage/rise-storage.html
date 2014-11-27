@@ -1,5 +1,5 @@
-<link rel="import" href="../../polymer/polymer.html">
-<link rel="import" href="../../core-ajax/core-ajax.html">
+<link rel="import" href="/components/polymer/polymer.html">
+<link rel="import" href="/components/core-ajax/core-ajax.html">
 
 <!--
 The `rise-storage` element retrieves URLs of files stored in Rise Storage.
@@ -47,12 +47,17 @@ You can trigger a request explicitly by calling `go` on the element.
 -->
 <polymer-element name="rise-storage" attributes="companyId folder fileName folderRefresh">
   <template>
-    <core-ajax id="ajax"
+    <core-ajax id="storage"
       url="{{url}}"
       handleAs="json"
-      on-core-response="{{handleResponse}}"
-      on-core-error="{{handleError}}"
-      auto>
+      on-core-response="{{handleStorageResponse}}"
+      on-core-error="{{handleStorageError}}">
+    </core-ajax>
+    <core-ajax id="ping"
+      url="http://localhost:9494/ping?callback=handlePingResponse"
+      handleAs="text"
+      on-core-response="{{handlePingResponse}}"
+      on-core-error="{{handlePingError}}">
     </core-ajax>
   </template>
 
@@ -118,6 +123,15 @@ You can trigger a request explicitly by calling `go` on the element.
        */
       url: "",
 
+       /**
+       * Whether or not Rise Cache is running.
+       *
+       * @property isCacheRunning
+       * @type boolean
+       * @default false
+       */
+      isCacheRunning: false,
+
       ready: function() {
         this.setUrl();
       },
@@ -146,7 +160,7 @@ You can trigger a request explicitly by calling `go` on the element.
           this.url = url;
         }
 
-        this.startTimer();
+        this.$.ping.go();
       },
 
       startTimer: function() {
@@ -156,7 +170,7 @@ You can trigger a request explicitly by calling `go` on the element.
 
           if (!isNaN(this.folderRefresh) && this.folderRefresh !== 0) {
             this.job("refresh", function() {
-              this.go();
+              this.$.ping.go();
               this.startTimer();
             }, this.folderRefresh * 1000);
           }
@@ -175,8 +189,9 @@ You can trigger a request explicitly by calling `go` on the element.
         this.setUrl();
       },
 
-      handleResponse: function(e, resp) {
-        var urls = [];
+      handleStorageResponse: function(e, resp) {
+        var self = this,
+          urls = [];
 
         // Send back array of URLs.
         if (resp && resp.response && resp.response.items) {
@@ -184,22 +199,51 @@ You can trigger a request explicitly by calling `go` on the element.
             // Check that this is not the folder itself.
             if (elem.contentType && elem.contentType !== "text/plain") {
               if (elem.mediaLink) {
-                urls.push(elem.mediaLink);
+                if (self.isCacheRunning) {
+                  urls.push("http://localhost:9494/?url=" + escape(elem.mediaLink));
+                }
+                else {
+                  urls.push(elem.mediaLink);
+                }
               }
             }
           });
         }
         else if (resp && resp.response && resp.response.mediaLink) {
-          urls.push(resp.response.mediaLink);
+          if (this.isCacheRunning) {
+            urls.push("http://localhost:9494/?url=" + escape(resp.response.mediaLink));
+          }
+          else {
+            urls.push(resp.response.mediaLink);
+          }
         }
 
+        this.startTimer();
         this.fire("rise-storage-response", urls);
       },
 
-      handleError: function(e, resp) {
-        console.log("Error: " + resp.xhr.status + " " + resp.xhr.statusText);
+      handleStorageError: function(e, resp) {
+        console.log("Storage Error: " + resp.xhr.status + " " + resp.xhr.statusText);
 
         this.fire("rise-storage-error", resp);
+      },
+
+      handlePingResponse: function(e, resp) {
+        if (resp.response === "") {
+          this.isCacheRunning = false;
+        }
+        else {
+          this.isCacheRunning = true;
+        }
+
+        this.go();
+      },
+
+      handlePingError: function(e, resp) {
+        console.log("Ping Error: " + resp.xhr.status + " " + resp.xhr.statusText);
+
+        this.isCacheRunning = false;
+        this.go();
       },
 
       /**
@@ -208,7 +252,7 @@ You can trigger a request explicitly by calling `go` on the element.
        * @method go
        */
       go: function() {
-        this.$.ajax.go();
+        this.$.storage.go();
       }
     });
   </script>
