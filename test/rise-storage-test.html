@@ -17,7 +17,6 @@
   <script src="/components/webcomponentsjs/webcomponents.js"></script>
   <script src="/components/web-component-tester/browser.js"></script>
 
-  <!-- Step 1: import the element to test -->
   <link rel="import" href="/rise-storage/rise-storage.html">
 </head>
 <body>
@@ -61,7 +60,7 @@
           assert.equal(storage.folderRefresh, 0);
         });
 
-        test("urls have the expected values", function() {
+        test("Storage URLs have the expected values", function() {
           assert.equal(storage.url, "");
           assert.equal(storage2.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o");
           assert.equal(storage3.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=/&prefix=my-folder/");
@@ -70,10 +69,14 @@
         });
       });
 
-      suite("requests", function() {
+      suite("Storage requests", function() {
         var headers = {
             "Content-Type": "text/json"
           },
+          bucketFile = JSON.stringify({
+            "contentType": "image/jpeg",
+            "mediaLink": "https://url.to.my-image.jpg"
+          }),
           multipleFiles = JSON.stringify({
             "items": [{
               "contentType": "image/jpeg",
@@ -119,17 +122,12 @@
         });
 
         test("should get a specific file in a bucket", function(done) {
-          var singleFile = JSON.stringify({
-            "contentType": "image/jpeg",
-            "mediaLink": "https://url.to.my-image.jpg"
-          });
-
           storage4.addEventListener("rise-storage-response", function(response) {
             assert.equal(response.detail.length, 1);
           });
 
           storage4.go();
-          requests[0].respond(200, headers, singleFile);
+          requests[0].respond(200, headers, bucketFile);
           done();
         });
 
@@ -147,6 +145,31 @@
 
           storage5.go();
           requests[0].respond(200, headers, singleFile);
+          done();
+        });
+
+        test("should return Rise Cache URLs for multiple files in a folder", function(done) {
+          storage3.addEventListener("rise-storage-response", function(response) {
+            assert.equal(response.detail.length, 2);
+            assert.equal(response.detail[0], "http://localhost:9494/?url=https%3A//url.to.my-image.jpg");
+            assert.equal(response.detail[1], "http://localhost:9494/?url=https%3A//url.to.my-image.gif");
+          });
+
+          storage3.isCacheRunning = true;
+          storage3.go();
+          requests[0].respond(200, headers, multipleFiles);
+          done();
+        });
+
+        test("should return Rise Cache URLs for a specific file in a bucket", function(done) {
+          storage4.addEventListener("rise-storage-response", function(response) {
+            assert.equal(response.detail.length, 1);
+            assert.equal(response.detail[0], "http://localhost:9494/?url=https%3A//url.to.my-image.jpg");
+          });
+
+          storage4.isCacheRunning = true;
+          storage4.go();
+          requests[0].respond(200, headers, bucketFile);
           done();
         });
 
@@ -211,6 +234,42 @@
         });
       });
 
+      suite("Ping request", function() {
+        var headers = {
+          "Content-Type": "text/plain"
+        };
+
+        test("should make a ping request with Rise Cache running", function(done) {
+          storage2.$.ping.go();
+          requests[0].respond(200, headers, "handlePingResponse();");
+
+          // Ping request + storage request
+          assert.equal(requests.length, 2);
+          assert.isTrue(storage2.isCacheRunning);
+          done();
+        });
+
+        test("should make a ping request with Rise Cache not running", function(done) {
+          storage2.$.ping.go();
+          requests[0].respond(200, headers, "");
+
+          // Ping request + storage request
+          assert.equal(requests.length, 2);
+          assert.isFalse(storage2.isCacheRunning);
+          done();
+        });
+
+        test("should error out on a ping request", function(done) {
+          storage2.$.ping.go();
+          requests[0].respond(404, headers, "handlePingResponse();");
+
+          // Ping request + storage request
+          assert.equal(requests.length, 2);
+          assert.isFalse(storage2.isCacheRunning);
+          done();
+        });
+      });
+
       suite("refresh", function() {
         var clock;
 
@@ -223,22 +282,26 @@
         });
 
         test("should check for changes to a folder", function() {
-          var spy = sinon.spy(storage3, "go");
+          var pingSpy = sinon.spy(storage3.$.ping, "go"),
+            timerSpy = sinon.spy(storage3, "startTimer");
 
           storage3.startTimer();
           clock.tick(9999);
-          assert(spy.notCalled);
+          assert(pingSpy.notCalled);
 
           clock.tick(1);
-          assert(spy.calledOnce);
+          assert(pingSpy.calledOnce);
+          assert(timerSpy.calledTwice);
         });
 
         test("should not check for changes to a file", function() {
-          var spy = sinon.spy(storage4, "go");
+          var pingSpy = sinon.spy(storage4.$.ping, "go"),
+            timerSpy = sinon.spy(storage4, "startTimer");
 
-          storage4.startTimer(spy);
+          storage4.startTimer(pingSpy);
           clock.tick(10000);
-          assert(spy.notCalled);
+          assert(pingSpy.notCalled);
+          assert(timerSpy.calledOnce);
         });
       });
 
