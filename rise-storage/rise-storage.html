@@ -125,10 +125,12 @@
           this.folderRefresh = parseInt(this.folderRefresh, 10);
 
           if (!isNaN(this.folderRefresh) && this.folderRefresh !== 0) {
+            this.folderRefresh = (this.folderRefresh < 15) ? 15 : this.folderRefresh;
+
             this.job("refresh", function() {
               this.$.ping.go();
               this.startTimer();
-            }, this.folderRefresh * 1000);
+            }, this.folderRefresh * 60000);
           }
         }
       },

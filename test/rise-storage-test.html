@@ -271,7 +271,7 @@
       });
 
       suite("refresh", function() {
-        var clock;
+        var clock, pingSpy, timerSpy;
 
         suiteSetup(function() {
           clock = sinon.useFakeTimers();
@@ -281,22 +281,25 @@
           clock.restore();
         });
 
-        test("should check for changes to a folder", function() {
-          var pingSpy = sinon.spy(storage3.$.ping, "go"),
-            timerSpy = sinon.spy(storage3, "startTimer");
+        test("should check for changes to a folder & enforce minimum refresh time", function() {
+          pingSpy = sinon.spy(storage3.$.ping, "go");
+          timerSpy = sinon.spy(storage3, "startTimer");
 
           storage3.startTimer();
-          clock.tick(9999);
+
+          // startTimer should not fire after 10 minutes have elapsed (folderRefresh=10).
+          clock.tick(600000);
           assert(pingSpy.notCalled);
 
-          clock.tick(1);
+          // Advance clock 5 minutes; startTimer should fire.
+          clock.tick(300000);
           assert(pingSpy.calledOnce);
           assert(timerSpy.calledTwice);
         });
 
         test("should not check for changes to a file", function() {
-          var pingSpy = sinon.spy(storage4.$.ping, "go"),
-            timerSpy = sinon.spy(storage4, "startTimer");
+          pingSpy = sinon.spy(storage4.$.ping, "go");
+          timerSpy = sinon.spy(storage4, "startTimer");
 
           storage4.startTimer(pingSpy);
           clock.tick(10000);
