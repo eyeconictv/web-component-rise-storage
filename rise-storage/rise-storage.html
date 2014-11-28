@@ -1,50 +1,6 @@
 <link rel="import" href="/components/polymer/polymer.html">
 <link rel="import" href="/components/core-ajax/core-ajax.html">
 
-<!--
-The `rise-storage` element retrieves URLs of files stored in Rise Storage.
-
-To use it, first load `webcomponents.js`. Many browsers have yet to implement the various web components APIs. Until they do, `webcomponents.js` provides polyfill support. Be sure to include this file before any code that touches the DOM.
-
-Next, load the element file using an HTML Import.
-
-For example:
-
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <script src="bower_components/webcomponentsjs/webcomponents.js"></script>
-        <link rel="import" href="bower_components/web-component-rise-storage/rise-storage/rise-storage.html">
-      </head>
-      <body>
-        <rise-storage
-          companyId="my-company-id"
-          folder="my-folder"
-          fileName="my-image.png"
-          folderRefresh="60"></rise-storage>
-
-        <script>
-          // Wait for 'polymer-ready'. Ensures the element is upgraded.
-          window.addEventListener('polymer-ready', function(e) {
-            var storage = document.querySelector('rise-storage');
-
-            // Respond to events it fires.
-            storage.addEventListener('rise-storage-response', function(e) {
-              console.log(e.detail[0]); // URL to the file.
-            });
-
-            storage.go(); // Call its API methods.
-          });
-        </script>
-      </body>
-    </html>
-
-You can trigger a request explicitly by calling `go` on the element.
-
-@element rise-storage
-@status alpha
-@homepage https://github.com/Rise-Vision/web-component-rise-storage
--->
 <polymer-element name="rise-storage" attributes="companyId folder fileName folderRefresh">
   <template>
     <core-ajax id="storage"
