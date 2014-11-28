@@ -62,10 +62,10 @@
 
         test("Storage URLs have the expected values", function() {
           assert.equal(storage.url, "");
-          assert.equal(storage2.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o");
-          assert.equal(storage3.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=/&prefix=my-folder/");
+          assert.equal(storage2.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F");
+          assert.equal(storage3.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=my-folder/");
           assert.equal(storage4.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/my-image.png");
-          assert.equal(storage5.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=/&prefix=my-folder/my-image.png");
+          assert.equal(storage5.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=my-folder/my-image.png");
         });
       });
 
@@ -74,21 +74,25 @@
             "Content-Type": "text/json"
           },
           bucketFile = JSON.stringify({
+            "name": "my-image.jpg",
             "contentType": "image/jpeg",
             "mediaLink": "https://url.to.my-image.jpg"
           }),
           multipleFiles = JSON.stringify({
             "items": [{
+              "name": "my-folder/",
+              "contentType": "text/plain",
+              "mediaLink": "https://url.to.my-folder"
+            },
+            {
+              "name": "my-folder/my-image.jpg",
               "contentType": "image/jpeg",
               "mediaLink": "https://url.to.my-image.jpg"
             },
             {
+              "name": "my-folder/my-image.gif",
               "contentType": "image/gif",
               "mediaLink": "https://url.to.my-image.gif"
-            },
-            {
-              "contentType": "text/plain",
-              "mediaLink": "https://url.to.my-folder"
             }]
           });
 
@@ -102,12 +106,25 @@
         });
 
         test("should get files in a bucket", function(done) {
+          var multipleBucketFiles = JSON.stringify({
+            "items": [{
+              "name": "my-image.jpg",
+              "contentType": "image/jpeg",
+              "mediaLink": "https://url.to.my-image.jpg"
+            },
+            {
+              "name": "my-image.gif",
+              "contentType": "image/gif",
+              "mediaLink": "https://url.to.my-image.gif"
+            }]
+          });
+
           storage2.addEventListener("rise-storage-response", function(response) {
             assert.equal(response.detail.length, 2);
           });
 
           storage2.go();
-          requests[0].respond(200, headers, multipleFiles);
+          requests[0].respond(200, headers, multipleBucketFiles);
           done();
         });
 
@@ -134,6 +151,7 @@
         test("should get a specific file in a folder", function(done) {
           var singleFile = JSON.stringify({
             "items": [{
+              "name": "my-folder/my-image.jpg",
               "contentType": "image/jpeg",
               "mediaLink": "https://url.to.my-image.jpg"
             }]

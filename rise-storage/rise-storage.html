@@ -93,24 +93,30 @@
       },
 
       setUrl: function() {
-        var url = "";
+        var baseUrl = "https://www.googleapis.com/storage/v1/b/risemedialibrary-" + encodeURIComponent(this.companyId) + "/o",
+          delimiter = "?delimiter=" + encodeURIComponent("/"),
+          folder = "&prefix=" + encodeURIComponent(this.folder) + "/",
+          fileName = encodeURIComponent(this.fileName),
+          url = baseUrl;
 
         if (this.companyId) {
-          url = "https://www.googleapis.com/storage/v1/b/risemedialibrary-" + encodeURIComponent(this.companyId) + "/o";
-
           if (this.folder) {
             // Get a specific file in a specific folder.
             if (this.fileName) {
-              url += "?delimiter=/&prefix=" + encodeURIComponent(this.folder) + "/" + encodeURIComponent(this.fileName);
+              url += delimiter + folder + fileName;
             }
             // Get all files in a specific folder.
             else {
-              url += "?delimiter=/&prefix=" + encodeURIComponent(this.folder) + "/";
+              url += delimiter + folder;
             }
           }
           // Get a specific file in a bucket.
           else if (this.fileName) {
-            url += "/" + encodeURIComponent(this.fileName);
+            url += "/" + fileName;
+          }
+          // Get all files in a bucket.
+          else {
+            url += delimiter;
           }
 
           this.url = url;
@@ -155,7 +161,7 @@
         if (resp && resp.response && resp.response.items) {
           resp.response.items.forEach(function(elem) {
             // Check that this is not the folder itself.
-            if (elem.contentType && elem.contentType !== "text/plain") {
+            if (elem.name && (elem.name.slice(-1) !== "/")) {
               if (elem.mediaLink) {
                 if (self.isCacheRunning) {
                   urls.push("http://localhost:9494/?url=" + escape(elem.mediaLink));
