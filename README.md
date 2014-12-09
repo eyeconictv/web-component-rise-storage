@@ -123,7 +123,7 @@ You can access the `demo.html` file via a local web server. On Mac, execute the 
 python -m SimpleHTTPServer
 ```
 
-This starts a web server on port 8000, and you can access the Rise Storage web component by navigating to `localhost:8000/rise-storage/demo.html`.
+This starts a web server on port 8000, and you can access the Rise Storage web component by navigating to `localhost:8000/demo.html`.
 
 ### Testing
 You can run the suite of tests via a local web server. On Mac, execute the following command from the root directory of the web component:

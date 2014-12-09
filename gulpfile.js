@@ -13,13 +13,13 @@
       .pipe(bump({type:"patch"}))
       .pipe(gulp.dest("./"));
 
-    gulp.src(["./rise-storage/bower.json"])
+    gulp.src(["./bower.json"])
       .pipe(bump({type:"patch"}))
-      .pipe(gulp.dest("./rise-storage/"));
+      .pipe(gulp.dest("./"));
   });
 
   gulp.task("lint", function() {
-    return gulp.src("./rise-storage/*.html")
+    return gulp.src("./*.html")
       .pipe(jshint.extract("always"))
       .pipe(jshint())
       .pipe(jshint.reporter("jshint-stylish"))
@@ -27,7 +27,7 @@
   });
 
   gulp.task("watch",function(){
-    gulp.watch("./rise-storage/*.html", ["build"]);
+    gulp.watch("./*.html", ["build"]);
   });
 
   gulp.task("build", function (cb) {
