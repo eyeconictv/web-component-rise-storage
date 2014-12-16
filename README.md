@@ -25,7 +25,7 @@ npm install webcomponents.js
 
 Next, install the Rise Storage Web Component with Bower:
 ```
-bower install rise-storage
+bower install https://github.com/Rise-Vision/web-component-rise-storage.git
 ```
 
 Finally, construct your HTML page. You should include `webcomponents.js` before any code that touches the DOM, and load the web component using an HTML Import. For example:
