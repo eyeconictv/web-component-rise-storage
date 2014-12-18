@@ -50,6 +50,9 @@
 
       setup(function() {
         requests = [];
+        // reset fixtures
+        storage3.setAttribute("folder", "my-folder");
+        storage3.removeAttribute("fileName");
       });
 
       suite("initialization", function() {
@@ -163,6 +166,13 @@
 
           storage5.go();
           requests[0].respond(200, headers, singleFile);
+          done();
+        });
+
+        test("should use correct URL after attribute change", function(done) {
+          storage3.setAttribute("fileName", "my-image.png");
+          storage3.go();
+          assert.equal(storage3.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=my-folder/my-image.png");
           done();
         });
 
