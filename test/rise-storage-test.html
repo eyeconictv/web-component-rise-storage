@@ -337,67 +337,10 @@
       });
 
       suite("triggers", function() {
-        test("should not trigger request when companyId changed", function(done) {
-          async.series([
-            function(cb) {
-              storage.companyId = "my-companyId";
-              cb();
-            },
-            flush,
-            function(cb) {
-              requestAnimationFrame(function() {
-                cb();
-              });
-            },
-            function(cb) {
-              assert.equal(requests.length, 0);
-              cb();
-            }
-            ], done);
-        });
-
-        test("should not trigger request when folder changed", function(done) {
-          async.series([
-            function(cb) {
-              storage.folder = "new-folder";
-              cb();
-            },
-            flush,
-            function(cb) {
-              requestAnimationFrame(function() {
-                cb();
-              });
-            },
-            function(cb) {
-              assert.equal(requests.length, 0);
-              cb();
-            }
-            ], done);
-        });
-
-        test("should not trigger request when fileName changed", function(done) {
-          async.series([
-            function(cb) {
-              storage.fileName = "new-fileName";
-              cb();
-            },
-            flush,
-            function(cb) {
-              requestAnimationFrame(function() {
-                cb();
-              });
-            },
-            function(cb) {
-              assert.equal(requests.length, 0);
-              cb();
-            }
-            ], done);
-        });
-
         test("should trigger request when called manually", function(done) {
           async.series([
             function(cb) {
-              storage.go();
+              storage2.go();
               cb();
             },
             flush,
