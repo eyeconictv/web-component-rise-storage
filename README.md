@@ -10,7 +10,7 @@ Rise Storage Web Component works in conjunction with [Rise Vision](http://www.ri
 
 At this time Chrome is the only browser that this project and Rise Vision supports.
 
-###Usage
+## Usage
 To use the Rise Storage Web Component, you should first install `webcomponents.js`. The `webcomponents.js` polyfills enable Web Components in (evergreen) browsers that lack native support.
 
 To install with Bower:
@@ -34,7 +34,7 @@ Finally, construct your HTML page. You should include `webcomponents.js` before 
 <html>
   <head>
     <script src="bower_components/webcomponentsjs/webcomponents.js"></script>
-    <link rel="import" href="bower_components/web-component-rise-storage/rise-storage/rise-storage.html">
+    <link rel="import" href="bower_components/rise-storage/rise-storage.html">
   </head>
   <body>
     <rise-storage
@@ -60,7 +60,7 @@ Finally, construct your HTML page. You should include `webcomponents.js` before 
 </html>
 ```
 
-#### Attributes
+### Attributes
 | Attribute       | Type                                                                            | Default          |
 | --------------- | ------------------------------------------------------------------------------- |:----------------:|
 | `companyId`     | `<string>` The ID of the Company.                                               | `''`             |
@@ -68,30 +68,31 @@ Finally, construct your HTML page. You should include `webcomponents.js` before 
 | `fileName`      | `<string>` The file name within the folder.                                     | `''`             |
 | `folderRefresh` | `<number>` The number of minutes before the folder will be checked for changes. The minimum refresh time is 15 minutes. | `0` (no refresh) |
 
-#### Properties
+### Properties
 | Property         | Type                                              | Default |
 | ---------------- | ------------------------------------------------- |:-------:|
 | `url`            | `<string>` The URL target of the request.         | `''`    |
 | `isCacheRunning` | `<boolean>` Whether or not Rise Cache is running. | `false` |
 
-#### Events
+### Events
 | Event                   | Description                        |
 | ----------------------- | -----------------------------------|
 | `rise-storage-response` | Fired when a response is received. |
 | `rise-storage-error`    | Fired when an error is received.   |
 
 
-#### Methods
+### Methods
 | Method | Description                                    |
 | ------ | ---------------------------------------------- |
 | `go`   | Performs an Ajax request to the specified URL. |
 
 ## Built With
 - [Polymer](https://www.polymer-project.org/)
+- [Polymer core-ajax](https://www.polymer-project.org/docs/elements/core-elements.html#core-ajax)
 - [npm](https://www.npmjs.org)
 - [Bower](http://bower.io/)
 - [Gulp](http://gulpjs.com/)
-- [Mocha](http://mochajs.org/), [Chai](http://chaijs.com/) and [web-component-tester](https://github.com/Polymer/web-component-tester) for testing
+- [web-component-tester](https://github.com/Polymer/web-component-tester) for testing
 
 ## Development
 
@@ -154,7 +155,7 @@ What you expected to happen.
 What actually happened. (screenshots / video captures always help)
 
 ## Contributing
-All contributions are greatly appreciated and welcome! If you would first like to sound out your contribution ideas, please post your thoughts to our [community](http://community.risevision.com), otherwise submit a pull request and we will do our best to incorporate it.
+All contributions are greatly appreciated and welcome! If you would first like to sound out your contribution ideas, please post your thoughts to our [community](http://community.risevision.com), otherwise submit a pull request and we will do our best to incorporate it. Please be sure to submit test cases with your code changes where appropriate.
 
 ## Resources
 If you have any questions or problems, please don't hesitate to join our lively and responsive community at http://community.risevision.com.
