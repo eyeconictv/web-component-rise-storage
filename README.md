@@ -61,12 +61,14 @@ Finally, construct your HTML page. You should include `webcomponents.js` before 
 ```
 
 ### Attributes
-| Attribute       | Type                                                                            | Default          |
-| --------------- | ------------------------------------------------------------------------------- |:----------------:|
-| `companyId`     | `<string>` The ID of the Company.                                               | `''`             |
-| `folder`        | `<string>` The folder name.                                                     | `''`             |
-| `fileName`      | `<string>` The file name within the folder.                                     | `''`             |
-| `folderRefresh` | `<number>` The number of minutes before the folder will be checked for changes. The minimum refresh time is 15 minutes. | `0` (no refresh) |
+| Attribute              | Type                                                                            | Default          |
+| ---------------------- | ------------------------------------------------------------------------------- |:----------------:|
+| `companyId` (required) | `<string>` The ID of the Company.                                               | `''`             |
+| `folder`               | `<string>` The folder name.                                                     | `''`             |
+| `fileName`             | `<string>` The file name within the folder.                                     | `''`             |
+| `fileType`             | `<string>` Either `image` or `video` (for HTML5 video types).                   | `''`             |
+| `contentType`          | `<string>` A specific media type (e.g. `image/png` or `video/mp4`).             | `''`             |
+| `folderRefresh`        | `<number>` The number of minutes before the folder will be checked for changes. The minimum refresh time is 15 minutes. | `0` (no refresh) |
 
 ### Properties
 | Property         | Type                                              | Default |
