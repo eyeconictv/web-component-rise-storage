@@ -6,6 +6,35 @@ The Rise Storage Web Component uses Google’s Storage API to retrieve the URL o
 
 Single files are only downloaded once and are not subsequently checked for changes. Folders are monitored for changes, but a minimum refresh time of 15 minutes is enforced.
 
+### Filtering
+Files can optionally be filtered by file type or content type. This feature is meant to be used when returning multiple files in a folder, and so will only take effect when a `folder` attribute is specified but not a `fileName`, or if neither a `folder` nor a `fileName` attribute are specified (in which case files in the root bucket would be returned).
+
+To filter by file type, a `fileType` attribute should be added to the `<rise-storage>` element. `fileType` can be either `image` or `video`, in which case only those files that are images (`jpg`, `png`, `bmp`, `svg`, `gif`) or HTML5 videos (`mp4`, `ogv`, `webm`) will be returned.
+
+Alternatively, the `contentType` attribute can be used to filter by a specific content type. Multiple content types can be specified by separating them with a space.
+
+#### Examples
+```
+<rise-storage companyId="my-company-id" folder="my-folder" fileType="image">
+</rise-storage>
+
+<rise-storage companyId="my-company-id" contentType="image/png image/jpeg">
+</rise-storage>
+```
+
+### Sorting
+Files can optionally be sorted by filename, modified date or randomly. This feature is meant to be used when returning multiple files in a folder, and so will only take effect when a `folder` attribute is specified but not a `fileName`, or if neither a `folder` nor a `fileName` attribute are specified (in which case files in the root bucket would be returned).
+
+To specify a sort order, a `sort` attribute should be added to the `<rise-storage>` element. `sort` can be one of `name`, `date` or `random`.
+
+To specify a direction, the `sortDirection` attribute should be used. `sortDirection` can be either `asc` or `desc`. If the sort attribute is set to `random`, then `sortDirection` is ignored. If the `sort` attribute is `name` or `date`, but `sortDirection` is not specified, the files will be sorted in ascending order.
+
+#### Example
+```
+<rise-storage companyId="my-company-id" folder="my-folder" sort="name" sortDirection="desc">
+</rise-storage>
+```
+
 Rise Storage Web Component works in conjunction with [Rise Vision](http://www.risevision.com), the [digital signage management application](http://rva.risevision.com/) that runs on [Google Cloud](https://cloud.google.com).
 
 At this time Chrome is the only browser that this project and Rise Vision supports.
@@ -68,6 +97,8 @@ Finally, construct your HTML page. You should include `webcomponents.js` before 
 | `fileName`             | `<string>` The file name within the folder.                                     | `''`             |
 | `fileType`             | `<string>` Either `image` or `video` (for HTML5 video types).                   | `''`             |
 | `contentType`          | `<string>` A specific media type (e.g. `image/png` or `video/mp4`).             | `''`             |
+| `sort`                 | `<string>` One of `name`, `date` or `random`.                                   | `''`             |
+| `sortDirection`        | `<string>` Either `asc` or `desc`.                                              | `''` (or `asc` if `sort` is `name` or `date`)|
 | `folderRefresh`        | `<number>` The number of minutes before the folder will be checked for changes. The minimum refresh time is 15 minutes. | `0` (no refresh) |
 
 ### Properties
