@@ -24,10 +24,11 @@
   <rise-storage id="invalid"></rise-storage>
   <rise-storage id="bucket" companyId="abc123"></rise-storage>
   <rise-storage id="folder" companyId="abc123" folder="my-folder" folderRefresh="10"></rise-storage>
-  <rise-storage id="file" companyId="abc123" fileName="my-image.png" folderRefresh="10"></rise-storage>
-  <rise-storage id="file-folder" companyId="abc123" folder="my-folder" fileName="my-image.png"></rise-storage>
+  <rise-storage id="file" companyId="abc123" fileName="circle.png" folderRefresh="10"></rise-storage>
+  <rise-storage id="file-folder" companyId="abc123" folder="my-folder" fileName="circle.png"></rise-storage>
   <rise-storage id="file-type" companyId="abc123" folder="my-folder" fileType="image"></rise-storage>
   <rise-storage id="content-type" companyId="abc123" folder="my-folder" contentType="image/jpeg image/png"></rise-storage>
+  <rise-storage id="sorting" companyId="abc123" folder="my-folder" fileType="video" sort="name" sortDirection="asc"></rise-storage>
 
   <script>
     suite("rise-storage", function() {
@@ -38,78 +39,92 @@
         fileFolder = document.querySelector("#file-folder"),
         fileType = document.querySelector("#file-type"),
         contentType = document.querySelector("#content-type"),
+        sorting = document.querySelector("#sorting"),
         headers = {
           "Content-Type": "text/json"
         },
         bucketFile = JSON.stringify({
-          "name": "my-image.jpg",
+          "name": "home.jpg",
           "contentType": "image/jpeg",
-          "mediaLink": "https://url.to.my-image.jpg"
+          "updated": "2015-02-04T17:45:25.945Z",
+          "mediaLink": "https://url.to.home.jpg"
         }),
         bucketFiles = JSON.stringify({
           "items": [{
-            "name": "my-image.jpg",
+            "name": "home.jpg",
             "contentType": "image/jpeg",
-            "mediaLink": "https://url.to.my-image.jpg"
+            "updated": "2015-02-04T17:45:25.945Z",
+            "mediaLink": "https://url.to.home.jpg"
           },
           {
-            "name": "my-image.gif",
+            "name": "turtle.gif",
             "contentType": "image/gif",
-            "mediaLink": "https://url.to.my-image.gif"
+            "updated": "2015-02-04T17:46:31.263Z",
+            "mediaLink": "https://url.to.turtle.gif"
           }]
         }),
         folderFile = JSON.stringify({
           "items": [{
-            "name": "my-folder/my-image.jpg",
+            "name": "my-folder/home.jpg",
             "contentType": "image/jpeg",
-            "mediaLink": "https://url.to.my-image.jpg"
+            "updated": "2015-02-04T17:45:25.945Z",
+            "mediaLink": "https://url.to.home.jpg"
           }]
         }),
         folderFiles = JSON.stringify({
           "items": [{
             "name": "my-folder/",
             "contentType": "text/plain",
+            "updated": "2015-02-04T17:44:00.549Z",
             "mediaLink": "https://url.to.my-folder"
           },
           {
-            "name": "my-folder/my-image.jpg",
+            "name": "my-folder/home.jpg",
             "contentType": "image/jpeg",
-            "mediaLink": "https://url.to.my-image.jpg"
+            "updated": "2015-02-04T17:45:25.945Z",
+            "mediaLink": "https://url.to.home.jpg"
           },
           {
-            "name": "my-folder/my-image.png",
+            "name": "my-folder/circle.png",
             "contentType": "image/png",
-            "mediaLink": "https://url.to.my-image.png"
+            "updated": "2015-02-06T14:25:11.312Z",
+            "mediaLink": "https://url.to.circle.png"
           },
           {
             "name": "my-folder/my-image.bmp",
             "contentType": "image/bmp",
+            "updated": "2015-02-06T11:24:13.313Z",
             "mediaLink": "https://url.to.my-image.bmp"
           },
           {
-            "name": "my-folder/my-image.svg",
+            "name": "my-folder/golf.svg",
             "contentType": "image/svg+xml",
-            "mediaLink": "https://url.to.my-image.svg"
+            "updated": "2015-01-30T08:19:09.263Z",
+            "mediaLink": "https://url.to.golf.svg"
           },
           {
-            "name": "my-folder/my-image.gif",
+            "name": "my-folder/turtle.gif",
             "contentType": "image/gif",
-            "mediaLink": "https://url.to.my-image.gif"
+            "updated": "2015-02-04T17:46:31.263Z",
+            "mediaLink": "https://url.to.turtle.gif"
           },
           {
-            "name": "my-folder/my-image.mp4",
+            "name": "my-folder/car-ad.mp4",
             "contentType": "video/mp4",
-            "mediaLink": "https://url.to.my-image.mp4"
+            "updated": "2015-02-02T10:03:11.263Z",
+            "mediaLink": "https://url.to.car-ad.mp4"
           },
           {
-            "name": "my-folder/my-image.ogv",
+            "name": "my-folder/walking-dead.ogv",
             "contentType": "video/ogg",
-            "mediaLink": "https://url.to.my-image.ogv"
+            "updated": "2015-02-01T09:08:15.263Z",
+            "mediaLink": "https://url.to.walking-dead.ogv"
           },
           {
-            "name": "my-folder/my-image.webm",
+            "name": "my-folder/south-park.webm",
             "contentType": "video/webm",
-            "mediaLink": "https://url.to.my-image.webm"
+            "updated": "2015-02-03T19:13:45.263Z",
+            "mediaLink": "https://url.to.south-park.webm"
           },
           ]
         }),
@@ -143,8 +158,8 @@
           assert.equal(invalid.url, "");
           assert.equal(bucket.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F");
           assert.equal(folder.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=my-folder/");
-          assert.equal(file.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/my-image.png");
-          assert.equal(fileFolder.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=my-folder/my-image.png");
+          assert.equal(file.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/circle.png");
+          assert.equal(fileFolder.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=my-folder/circle.png");
         });
       });
 
@@ -208,9 +223,9 @@
         });
 
         test("should use correct URL after attribute change", function(done) {
-          folder.setAttribute("fileName", "my-image.png");
+          folder.setAttribute("fileName", "circle.png");
           folder.go();
-          assert.equal(folder.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=my-folder/my-image.png");
+          assert.equal(folder.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=my-folder/circle.png");
           folder.removeAttribute("fileName");
           done();
         });
@@ -218,8 +233,8 @@
         test("should return Rise Cache URLs for multiple files in a folder", function(done) {
           listener = function(response) {
             assert.equal(response.detail.length, 8);
-            assert.equal(response.detail[0], "http://localhost:9494/?url=https%3A//url.to.my-image.jpg");
-            assert.equal(response.detail[1], "http://localhost:9494/?url=https%3A//url.to.my-image.png");
+            assert.equal(response.detail[0], "http://localhost:9494/?url=https%3A//url.to.home.jpg");
+            assert.equal(response.detail[1], "http://localhost:9494/?url=https%3A//url.to.circle.png");
             folder.removeEventListener("rise-storage-response", listener);
           };
 
@@ -234,7 +249,7 @@
         test("should return Rise Cache URLs for a specific file in a bucket", function(done) {
           listener = function(response) {
            assert.equal(response.detail.length, 1);
-            assert.equal(response.detail[0], "http://localhost:9494/?url=https%3A//url.to.my-image.jpg");
+            assert.equal(response.detail[0], "http://localhost:9494/?url=https%3A//url.to.home.jpg");
             file.removeEventListener("rise-storage-response", listener);
           };
 
@@ -380,13 +395,106 @@
         test("should return only .jpg and .png files when filtering by contentType", function(done) {
           listener = function(response) {
             assert.equal(response.detail.length, 2);
-            assert.equal(response.detail[0], "https://url.to.my-image.jpg");
-            assert.equal(response.detail[1], "https://url.to.my-image.png");
+            assert.equal(response.detail[0], "https://url.to.home.jpg");
+            assert.equal(response.detail[1], "https://url.to.circle.png");
             contentType.removeEventListener("rise-storage-response", listener);
           };
 
           contentType.addEventListener("rise-storage-response", listener);
           contentType.go();
+          requests[0].respond(200, headers, folderFiles);
+          done();
+        });
+      });
+
+      suite("sorting", function() {
+        test("should sort in ascending order by name", function(done) {
+          listener = function(response) {
+            assert.equal(response.detail[0], "https://url.to.car-ad.mp4");
+            assert.equal(response.detail[1], "https://url.to.south-park.webm");
+            assert.equal(response.detail[2], "https://url.to.walking-dead.ogv");
+            sorting.removeEventListener("rise-storage-response", listener);
+          };
+
+          sorting.addEventListener("rise-storage-response", listener);
+          sorting.go();
+          requests[0].respond(200, headers, folderFiles);
+          done();
+        });
+
+        test("should sort in descending order by name", function(done) {
+          listener = function(response) {
+            assert.equal(response.detail[0], "https://url.to.walking-dead.ogv");
+            assert.equal(response.detail[1], "https://url.to.south-park.webm");
+            assert.equal(response.detail[2], "https://url.to.car-ad.mp4");
+            sorting.removeEventListener("rise-storage-response", listener);
+          };
+
+          sorting.setAttribute("sortDirection", "desc");
+          sorting.addEventListener("rise-storage-response", listener);
+          sorting.go();
+          requests[0].respond(200, headers, folderFiles);
+          done();
+        });
+
+        test("should sort in ascending order by date", function(done) {
+          listener = function(response) {
+            assert.equal(response.detail[0], "https://url.to.walking-dead.ogv");
+            assert.equal(response.detail[1], "https://url.to.car-ad.mp4");
+            assert.equal(response.detail[2], "https://url.to.south-park.webm");
+            sorting.removeEventListener("rise-storage-response", listener);
+          };
+
+          sorting.setAttribute("sort", "date");
+          sorting.setAttribute("sortDirection", "asc");
+          sorting.addEventListener("rise-storage-response", listener);
+          sorting.go();
+          requests[0].respond(200, headers, folderFiles);
+          done();
+        });
+
+        test("should sort in descending order by date", function(done) {
+          listener = function(response) {
+            assert.equal(response.detail[0], "https://url.to.south-park.webm");
+            assert.equal(response.detail[1], "https://url.to.car-ad.mp4");
+            assert.equal(response.detail[2], "https://url.to.walking-dead.ogv");
+            sorting.removeEventListener("rise-storage-response", listener);
+          };
+
+          sorting.setAttribute("sortDirection", "desc");
+          sorting.addEventListener("rise-storage-response", listener);
+          sorting.go();
+          requests[0].respond(200, headers, folderFiles);
+          done();
+        });
+
+        test("should sort in random order", function(done) {
+          listener = function(response) {
+            /* Not possible to predict what order files will be returned in,
+            only that they are returned. */
+            assert.equal(response.detail.length, 3);
+            sorting.removeEventListener("rise-storage-response", listener);
+          };
+
+          sorting.setAttribute("sort", "random");
+          sorting.addEventListener("rise-storage-response", listener);
+          sorting.go();
+          requests[0].respond(200, headers, folderFiles);
+          done();
+        });
+
+        test("should sort in ascending order when no sortDirection is specified", function(done) {
+          listener = function(response) {
+            assert.equal(response.detail[0], "https://url.to.walking-dead.ogv");
+            assert.equal(response.detail[1], "https://url.to.car-ad.mp4");
+            assert.equal(response.detail[2], "https://url.to.south-park.webm");
+            sorting.removeEventListener("rise-storage-response", listener);
+          };
+
+          sorting.setAttribute("sort", "date");
+          sorting.removeAttribute("sortDirection");
+          sorting.addEventListener("rise-storage-response", listener);
+          sorting.go();
           requests[0].respond(200, headers, folderFiles);
           done();
         });
