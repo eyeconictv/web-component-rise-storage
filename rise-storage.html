@@ -20,7 +20,7 @@
   </template>
 
   <script>
-    /* global Polymer */
+    /* global Polymer, _ */
     /*jshint newcap: false */
     Polymer("rise-storage", {
       /**
@@ -145,12 +145,17 @@
       setUrl: function() {
         var baseUrl = "https://www.googleapis.com/storage/v1/b/risemedialibrary-" + encodeURIComponent(this.companyId) + "/o",
           delimiter = "?delimiter=" + encodeURIComponent("/"),
-          folder = "&prefix=" + encodeURIComponent(this.folder) + "/",
+          folder = "&prefix=" + encodeURIComponent(this.folder),
           fileName = encodeURIComponent(this.fileName),
           url = baseUrl;
 
         if (this.companyId) {
           if (this.folder) {
+            // Append a "/" at end of folder if necessary.
+            if (this.folder.slice(-1) !== "/") {
+              folder += "/";
+            }
+
             // Get a specific file in a specific folder.
             if (this.fileName) {
               url += delimiter + folder + fileName;
