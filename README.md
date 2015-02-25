@@ -70,7 +70,7 @@ Finally, construct your HTML page. You should include `webcomponents.js` before 
       companyId="my-company-id"
       folder="my-folder"
       fileName="my-image.png"
-      folderRefresh="60"></rise-storage>
+      refresh="60"></rise-storage>
 
     <script>
       // Wait for 'polymer-ready'. Ensures the element is upgraded.
@@ -99,7 +99,7 @@ Finally, construct your HTML page. You should include `webcomponents.js` before 
 | `contentType`          | `<string>` A specific media type (e.g. `image/png` or `video/mp4`).             | `''`             |
 | `sort`                 | `<string>` One of `name`, `date` or `random`.                                   | `''`             |
 | `sortDirection`        | `<string>` Either `asc` or `desc`.                                              | `''` (or `asc` if `sort` is `name` or `date`)|
-| `folderRefresh`        | `<number>` The number of minutes before the folder will be checked for changes. The minimum refresh time is 15 minutes. | `0` (no refresh) |
+| `refresh`              | `<number>` The number of minutes before the folder will be checked for changes. The minimum refresh time is 15 minutes. | `0` (no refresh) |
 
 ### Properties
 | Property         | Type                                              | Default |
