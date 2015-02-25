@@ -23,8 +23,8 @@
 
   <rise-storage id="invalid"></rise-storage>
   <rise-storage id="bucket" companyId="abc123"></rise-storage>
-  <rise-storage id="folder" companyId="abc123" folder="my-folder" folderRefresh="10"></rise-storage>
-  <rise-storage id="file" companyId="abc123" fileName="circle.png" folderRefresh="10"></rise-storage>
+  <rise-storage id="folder" companyId="abc123" folder="my-folder" refresh="10"></rise-storage>
+  <rise-storage id="file" companyId="abc123" fileName="circle.png" refresh="10"></rise-storage>
   <rise-storage id="file-folder" companyId="abc123" folder="my-folder" fileName="circle.png"></rise-storage>
   <rise-storage id="file-type" companyId="abc123" folder="my-folder" fileType="image"></rise-storage>
   <rise-storage id="content-type" companyId="abc123" folder="my-folder" contentType="image/jpeg image/png"></rise-storage>
@@ -151,7 +151,7 @@
           assert.equal(invalid.companyId, "");
           assert.equal(invalid.folder, "");
           assert.equal(invalid.fileName, "");
-          assert.equal(invalid.folderRefresh, 0);
+          assert.equal(invalid.refresh, 0);
         });
 
         test("Storage URLs have the expected values", function() {
@@ -500,7 +500,7 @@
         });
       });
 
-      suite("folderRefresh", function() {
+      suite("refresh", function() {
         var clock, pingSpy, timerSpy;
 
         suiteSetup(function() {
@@ -517,7 +517,7 @@
 
           folder.startTimer();
 
-          // startTimer should not fire after 10 minutes have elapsed (folderRefresh=10).
+          // startTimer should not fire after 10 minutes have elapsed (refresh=10).
           clock.tick(600000);
           assert(pingSpy.notCalled);
 
