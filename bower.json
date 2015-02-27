@@ -1,6 +1,6 @@
 {
   "name": "rise-storage",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "authors": [
     "Donna Peplinskie <donna.peplinskie@risevision.com>"
   ],
@@ -21,6 +21,7 @@
   "dependencies": {
     "core-ajax": "Polymer/core-ajax#~0.5.1",
     "polymer": "Polymer/polymer#~0.5.1",
-    "underscore": "~1.7.0"
+    "underscore": "~1.7.0",
+    "web-component-tester": "Polymer/web-component-tester#~2.2.4"
   }
 }
