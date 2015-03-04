@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>Tagging - Filtering</title>
+
+  <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../rise-storage.html">
+</head>
+<body>
+  <rise-storage id="fileType" companyId="abc123" folder="my-folder" fileType="image">
+    <rise-tag type="lookup" name="brand"></rise-tag>
+  </rise-storage>
+
+  <rise-storage id="contentType" companyId="abc123" folder="my-folder" contentType="image/jpeg image/png">
+    <rise-tag type="lookup" name="brand"></rise-tag>
+  </rise-storage>
+
+  <script src="js/rise-tag-data.js"></script>
+  <script>
+    suite("filter", function() {
+      var fileType = document.querySelector("#fileType"),
+        contentType = document.querySelector("#contentType");
+
+      suiteSetup(function() {
+        xhr = sinon.useFakeXMLHttpRequest();
+
+        xhr.onCreate = function (xhr) {
+          requests.push(xhr);
+        };
+      });
+
+      suiteTeardown(function() {
+        xhr.restore();
+      });
+
+      setup(function() {
+        requests = [];
+      });
+
+      test("should return only image files when filtering by fileType", function(done) {
+        listener = function(response) {
+          assert.equal(response.detail.files.length, 3);
+
+          fileType.removeEventListener("rise-storage-response", listener);
+        };
+
+        fileType.addEventListener("rise-storage-response", listener);
+        fileType.go();
+        requests[0].respond(200, header, multiple);
+        done();
+      });
+
+      test("should return only video files when filtering by fileType", function(done) {
+        listener = function(response) {
+          assert.equal(response.detail.files.length, 1);
+
+          fileType.removeEventListener("rise-storage-response", listener);
+        };
+
+        fileType.setAttribute("fileType", "video");
+        fileType.addEventListener("rise-storage-response", listener);
+        fileType.go();
+        requests[0].respond(200, header, multiple);
+        done();
+      });
+
+      test("should return only .jpg and .png files when filtering by contentType", function(done) {
+        listener = function(response) {
+          assert.equal(response.detail.files.length, 2);
+          assert.equal(JSON.stringify(response.detail.files[0]), shoes);
+          assert.equal(JSON.stringify(response.detail.files[1]), jeans);
+
+          contentType.removeEventListener("rise-storage-response", listener);
+        };
+
+        contentType.addEventListener("rise-storage-response", listener);
+        contentType.go();
+        requests[0].respond(200, header, multiple);
+        done();
+      });
+    });
+  </script>
+</body>
+</html>

@@ -30,11 +30,15 @@
     gulp.watch("./*.html", ["build"]);
   });
 
+  gulp.task("test", function(cb) {
+    runSequence("test:local", cb);
+  });
+
   gulp.task("build", function (cb) {
     runSequence(["lint"], cb);
   });
 
   gulp.task("default", function(cb) {
-    runSequence("test:local", "build", cb);
+    runSequence("test", "build", cb);
   });
 })();

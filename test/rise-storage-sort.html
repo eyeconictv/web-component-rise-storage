@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>rise-storage</title>
+
+  <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../rise-storage.html">
+</head>
+<body>
+  <rise-storage id="sorting" companyId="abc123" folder="my-folder" fileType="video" sort="name" sortDirection="asc"></rise-storage>
+
+  <script src="js/rise-storage-data.js"></script>
+  <script>
+    suite("sort", function() {
+      var sorting = document.querySelector("#sorting");
+
+      suiteSetup(function() {
+        xhr = sinon.useFakeXMLHttpRequest();
+
+        xhr.onCreate = function (xhr) {
+          requests.push(xhr);
+        };
+      });
+
+      suiteTeardown(function() {
+        xhr.restore();
+      });
+
+      setup(function() {
+        requests = [];
+      });
+
+      test("should sort in ascending order by name", function(done) {
+        listener = function(response) {
+          assert.equal(JSON.stringify(response.detail.files[0]),
+            '{"url":"https://url.to.car-ad.mp4"}');
+          assert.equal(JSON.stringify(response.detail.files[1]),
+            '{"url":"https://url.to.south-park.webm"}');
+          assert.equal(JSON.stringify(response.detail.files[2]),
+            '{"url":"https://url.to.walking-dead.ogv"}');
+          sorting.removeEventListener("rise-storage-response", listener);
+        };
+
+        sorting.addEventListener("rise-storage-response", listener);
+        sorting.go();
+        requests[0].respond(200, header, folderFiles);
+        done();
+      });
+
+      test("should sort in descending order by name", function(done) {
+        listener = function(response) {
+          assert.equal(JSON.stringify(response.detail.files[0]),
+            '{"url":"https://url.to.walking-dead.ogv"}');
+          assert.equal(JSON.stringify(response.detail.files[1]),
+            '{"url":"https://url.to.south-park.webm"}');
+          assert.equal(JSON.stringify(response.detail.files[2]),
+            '{"url":"https://url.to.car-ad.mp4"}');
+          sorting.removeEventListener("rise-storage-response", listener);
+        };
+
+        sorting.setAttribute("sortDirection", "desc");
+        sorting.addEventListener("rise-storage-response", listener);
+        sorting.go();
+        requests[0].respond(200, header, folderFiles);
+        done();
+      });
+
+      test("should sort in ascending order by date", function(done) {
+        listener = function(response) {
+          assert.equal(JSON.stringify(response.detail.files[0]),
+            '{"url":"https://url.to.walking-dead.ogv"}');
+          assert.equal(JSON.stringify(response.detail.files[1]),
+            '{"url":"https://url.to.car-ad.mp4"}');
+          assert.equal(JSON.stringify(response.detail.files[2]),
+            '{"url":"https://url.to.south-park.webm"}');
+          sorting.removeEventListener("rise-storage-response", listener);
+        };
+
+        sorting.setAttribute("sort", "date");
+        sorting.setAttribute("sortDirection", "asc");
+        sorting.addEventListener("rise-storage-response", listener);
+        sorting.go();
+        requests[0].respond(200, header, folderFiles);
+        done();
+      });
+
+      test("should sort in descending order by date", function(done) {
+        listener = function(response) {
+          assert.equal(JSON.stringify(response.detail.files[0]),
+            '{"url":"https://url.to.south-park.webm"}');
+          assert.equal(JSON.stringify(response.detail.files[1]),
+            '{"url":"https://url.to.car-ad.mp4"}');
+          assert.equal(JSON.stringify(response.detail.files[2]),
+            '{"url":"https://url.to.walking-dead.ogv"}');
+          sorting.removeEventListener("rise-storage-response", listener);
+        };
+
+        sorting.setAttribute("sortDirection", "desc");
+        sorting.addEventListener("rise-storage-response", listener);
+        sorting.go();
+        requests[0].respond(200, header, folderFiles);
+        done();
+      });
+
+      test("should sort in random order", function(done) {
+        listener = function(response) {
+          /* Not possible to predict what order files will be returned in,
+          only that they are returned. */
+          assert.equal(response.detail.files.length, 3);
+          sorting.removeEventListener("rise-storage-response", listener);
+        };
+
+        sorting.setAttribute("sort", "random");
+        sorting.addEventListener("rise-storage-response", listener);
+        sorting.go();
+        requests[0].respond(200, header, folderFiles);
+        done();
+      });
+
+      test("should sort in ascending order when no sortDirection is specified", function(done) {
+        listener = function(response) {
+          assert.equal(JSON.stringify(response.detail.files[0]),
+            '{"url":"https://url.to.walking-dead.ogv"}');
+          assert.equal(JSON.stringify(response.detail.files[1]),
+            '{"url":"https://url.to.car-ad.mp4"}');
+          assert.equal(JSON.stringify(response.detail.files[2]),
+            '{"url":"https://url.to.south-park.webm"}');
+          sorting.removeEventListener("rise-storage-response", listener);
+        };
+
+        sorting.setAttribute("sort", "date");
+        sorting.removeAttribute("sortDirection");
+        sorting.addEventListener("rise-storage-response", listener);
+        sorting.go();
+        requests[0].respond(200, header, folderFiles);
+        done();
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>Storage - Invalid Attributes</title>
+
+  <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../rise-storage.html">
+</head>
+<body>
+  <rise-storage id="noCompany"></rise-storage>
+  <rise-storage id="invalidCompany" companyId="invalid"></rise-storage>
+  <rise-storage id="invalidFolder" companyId="abc123" folder="invalid"></rise-storage>
+  <rise-storage id="invalidFileType" companyId="abc123" folder="my-folder" fileType="invalid"></rise-storage>
+  <rise-storage id="invalidContentType" companyId="abc123" folder="my-folder" contentType="invalid"></rise-storage>
+  <rise-storage id="invalidSort" companyId="abc123" folder="my-folder" fileType="video" sort="invalid"></rise-storage>
+  <rise-storage id="invalidSortDirection" companyId="abc123" folder="my-folder" fileType="video"
+    sort="name" sortDirection="invalid"></rise-storage>
+  <rise-storage id="invalidRefresh" companyId="abc123" folder="my-folder" refresh="abc"></rise-storage>
+
+  <script src="js/rise-storage-data.js"></script>
+  <script>
+    suite("invalid attributes", function() {
+      var noCompany = document.querySelector("#noCompany"),
+        invalidCompany = document.querySelector("#invalidCompany"),
+        invalidFolder = document.querySelector("#invalidFolder"),
+        invalidFileType = document.querySelector("#invalidFileType"),
+        invalidContentType = document.querySelector("#invalidContentType"),
+        invalidSort = document.querySelector("#invalidSort"),
+        invalidSortDirection = document.querySelector("#invalidSortDirection"),
+        invalidRefresh = document.querySelector("#invalidRefresh");
+
+      suiteSetup(function() {
+        xhr = sinon.useFakeXMLHttpRequest();
+
+        xhr.onCreate = function (xhr) {
+          requests.push(xhr);
+        };
+      });
+
+      suiteTeardown(function() {
+        xhr.restore();
+      });
+
+      setup(function() {
+        requests = [];
+      });
+
+      test("should not make a request for no companyId", function(done) {
+          noCompany.go();
+
+          assert.equal(requests.length, 0);
+          done();
+        });
+
+      test("should fire rise-storage-error for an invalid companyId", function(done) {
+        var responded;
+
+        listener = function(response) {
+          responded = true;
+          invalidCompany.removeEventListener("rise-storage-error", listener);
+        };
+
+        invalidCompany.addEventListener("rise-storage-error", listener);
+        invalidCompany.go();
+        requests[0].respond(404, header, invalidCompanyData);
+        assert.isTrue(responded);
+        done();
+      });
+
+      test("should return an empty object for an invalid folder or file", function(done) {
+        listener = function(response) {
+          assert.equal(JSON.stringify(response.detail), "{}");
+
+          invalidFolder.removeEventListener("rise-storage-response", listener);
+        };
+
+        invalidFolder.addEventListener("rise-storage-response", listener);
+        invalidFolder.go();
+        requests[0].respond(200, header, invalidFolderData);
+        done();
+      });
+
+      test("should not return any files for an invalid file type", function(done) {
+        listener = function(response) {
+          assert.equal(response.detail.files.length, 0);
+
+          invalidFileType.removeEventListener("rise-storage-response", listener);
+        };
+
+        invalidFileType.addEventListener("rise-storage-response", listener);
+        invalidFileType.go();
+        requests[0].respond(200, header, folderFiles);
+        done();
+      });
+
+      test("should not return any files for an invalid content type", function(done) {
+        listener = function(response) {
+          assert.equal(response.detail.files.length, 0);
+
+          invalidContentType.removeEventListener("rise-storage-response", listener);
+        };
+
+        invalidContentType.addEventListener("rise-storage-response", listener);
+        invalidContentType.go();
+        requests[0].respond(200, header, folderFiles);
+        done();
+      });
+
+      test("should not sort files for an invalid sort", function(done) {
+        listener = function(response) {
+          assert.equal(JSON.stringify(response.detail.files[0]),
+            '{"url":"https://url.to.car-ad.mp4"}');
+          assert.equal(JSON.stringify(response.detail.files[1]),
+            '{"url":"https://url.to.walking-dead.ogv"}');
+          assert.equal(JSON.stringify(response.detail.files[2]),
+            '{"url":"https://url.to.south-park.webm"}');
+
+          invalidSort.removeEventListener("rise-storage-response", listener);
+        };
+
+        invalidSort.addEventListener("rise-storage-response", listener);
+        invalidSort.go();
+        requests[0].respond(200, header, folderFiles);
+        done();
+      });
+
+      test("should sort files in ascending order for an invalid sort direction", function(done) {
+        listener = function(response) {
+          assert.equal(JSON.stringify(response.detail.files[0]),
+            '{"url":"https://url.to.car-ad.mp4"}');
+          assert.equal(JSON.stringify(response.detail.files[1]),
+            '{"url":"https://url.to.south-park.webm"}');
+          assert.equal(JSON.stringify(response.detail.files[2]),
+            '{"url":"https://url.to.walking-dead.ogv"}');
+
+          invalidSortDirection.removeEventListener("rise-storage-response", listener);
+        };
+
+        invalidSortDirection.addEventListener("rise-storage-response", listener);
+        invalidSortDirection.go();
+        requests[0].respond(200, header, folderFiles);
+        done();
+      });
+
+      test("should not refresh for an invalid refresh interval", function(done) {
+        var clock, pingSpy, timerSpy;
+
+        clock = sinon.useFakeTimers();
+        pingSpy = sinon.spy(invalidRefresh.$.ping, "go");
+        timerSpy = sinon.spy(invalidRefresh, "startTimer");
+
+        invalidRefresh.startTimer();
+        clock.tick(900000);
+        assert(pingSpy.notCalled);
+        assert(timerSpy.calledOnce);
+        clock.restore();
+        done();
+      });
+    });
+  </script>
+</body>
+</html>

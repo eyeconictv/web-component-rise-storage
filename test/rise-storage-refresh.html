@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>rise-storage</title>
+
+  <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../rise-storage.html">
+</head>
+<body>
+  <rise-storage id="folder" companyId="abc123" folder="my-folder" refresh="10"></rise-storage>
+  <rise-storage id="file" companyId="abc123" fileName="circle.png" refresh="10"></rise-storage>
+
+  <script src="js/rise-storage-data.js"></script>
+  <script>
+    suite("refresh", function() {
+      var folder = document.querySelector("#folder"),
+        file = document.querySelector("#file"),
+        clock, pingSpy, timerSpy;
+
+      suiteSetup(function() {
+        clock = sinon.useFakeTimers();
+      });
+
+      suiteTeardown(function() {
+        clock.restore();
+      });
+
+      test("should check for changes to a folder & enforce minimum refresh time", function() {
+        pingSpy = sinon.spy(folder.$.ping, "go");
+        timerSpy = sinon.spy(folder, "startTimer");
+
+        folder.startTimer();
+
+        // startTimer should not fire after 10 minutes have elapsed (refresh=10).
+        clock.tick(600000);
+        assert(pingSpy.notCalled);
+
+        // Advance clock 5 minutes - startTimer should fire.
+        clock.tick(300000);
+        assert(pingSpy.calledOnce);
+        assert(timerSpy.calledTwice);
+      });
+
+      test("should not check for changes to a file", function() {
+        pingSpy = sinon.spy(file.$.ping, "go");
+        timerSpy = sinon.spy(file, "startTimer");
+
+        file.startTimer(pingSpy);
+        clock.tick(10000);
+        assert(pingSpy.notCalled);
+        assert(timerSpy.calledOnce);
+      });
+    });
+  </script>
+</body>
+</html>
