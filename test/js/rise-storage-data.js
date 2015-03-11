@@ -55,13 +55,33 @@ var header = { "Content-Type": "text/json" },
       "mediaLink": "https://url.to.south-park.webm"
     }]
   }),
-  bucketFile = JSON.stringify({
+  folderFile = JSON.stringify({
+    "items": [{
+      "name": "my-folder/home.jpg",
+      "contentType": "image/jpeg",
+      "updated": "2015-02-04T17:45:25.945Z",
+      "mediaLink": "https://url.to.home.jpg"
+    }]
+  }),
+  bucketFiles = JSON.stringify({
     "items": [{
       "name": "home.jpg",
       "contentType": "image/jpeg",
       "updated": "2015-02-04T17:45:25.945Z",
       "mediaLink": "https://url.to.home.jpg"
+    },
+    {
+      "name": "turtle.gif",
+      "contentType": "image/gif",
+      "updated": "2015-02-04T17:46:31.263Z",
+      "mediaLink": "https://url.to.turtle.gif"
     }]
+  }),
+  bucketFile = JSON.stringify({
+    "name": "home.jpg",
+    "contentType": "image/jpeg",
+    "updated": "2015-02-04T17:45:25.945Z",
+    "mediaLink": "https://url.to.home.jpg"
   }),
   invalidCompanyData = JSON.stringify({
     "error": {
