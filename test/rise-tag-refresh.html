@@ -16,14 +16,9 @@
     <rise-tag type="lookup" name="brand"></rise-tag>
   </rise-storage>
 
-  <rise-storage id="file" companyId="abc123" fileName="moon.jpg" refresh="15">
-    <rise-tag type="lookup" name="brand"></rise-tag>
-  </rise-storage>
-
   <script>
     suite("refresh", function() {
       var invalidRefresh = document.querySelector("#invalidRefresh"),
-        file = document.querySelector("#file"),
         clock, pingSpy, timerSpy;
 
       suiteSetup(function() {
@@ -48,16 +43,6 @@
         clock.tick(300000);
         assert(pingSpy.calledOnce);
         assert(timerSpy.calledTwice);
-      });
-
-      test("should not refresh when 'fileName' attribute is specified", function() {
-        pingSpy = sinon.spy(file.$.ping, "go");
-        timerSpy = sinon.spy(file, "startTimer");
-
-        file.startTimer(pingSpy);
-        clock.tick(900000);
-        assert(pingSpy.notCalled);
-        assert(timerSpy.calledOnce);
       });
     });
   </script>

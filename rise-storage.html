@@ -315,19 +315,16 @@
        * Handles a refresh.
        */
       startTimer: function() {
-        // Don't refresh individual files.
-        if (!this.fileName) {
-          this.refresh = parseInt(this.refresh, 10);
+        this.refresh = parseInt(this.refresh, 10);
 
-          if (!isNaN(this.refresh) && this.refresh !== 0) {
-            this.refresh = (this.refresh < 15) ? 15 : this.refresh;
+        if (!isNaN(this.refresh) && this.refresh !== 0) {
+          this.refresh = (this.refresh < 15) ? 15 : this.refresh;
 
-            this.job("refresh", function() {
-              this.pingReceived = false;
-              this.$.ping.go();
-              this.startTimer();
-            }, this.refresh * 60000);
-          }
+          this.job("refresh", function() {
+            this.pingReceived = false;
+            this.$.ping.go();
+            this.startTimer();
+          }, this.refresh * 60000);
         }
       },
 
