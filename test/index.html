@@ -5,13 +5,23 @@
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <title>Tests</title>
 
-    <script src="/components/webcomponentsjs/webcomponents.js"></script>
-    <script src="/components/web-component-tester/browser.js"></script>
+    <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
   </head>
   <body>
     <script>
       WCT.loadSuites([
-        "rise-storage-test.html",
+        "rise-storage.html",
+        "rise-storage-cache.html",
+        "rise-storage-filter.html",
+        "rise-storage-sort.html",
+        "rise-storage-refresh.html",
+        "rise-storage-invalid.html",
+        "rise-tag.html",
+        "rise-tag-filter.html",
+        "rise-tag-sort.html",
+        "rise-tag-refresh.html",
+        "rise-tag-invalid.html"
       ]);
     </script>
   </body>

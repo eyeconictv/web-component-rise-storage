@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>rise-storage</title>
+
+  <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../rise-storage.html">
+</head>
+<body>
+  <rise-storage id="invalid"></rise-storage>
+  <rise-storage id="bucket" companyId="abc123"></rise-storage>
+  <rise-storage id="folder" companyId="abc123" folder="my-folder"></rise-storage>
+  <rise-storage id="file" companyId="abc123" fileName="circle.png"></rise-storage>
+  <rise-storage id="file-folder" companyId="abc123" folder="my-folder" fileName="circle.png"></rise-storage>
+
+  <script src="js/rise-storage-data.js"></script>
+  <script>
+    suite("rise-storage", function() {
+      var invalid = document.querySelector("#invalid"),
+        bucket = document.querySelector("#bucket"),
+        folder = document.querySelector("#folder"),
+        file = document.querySelector("#file"),
+        fileFolder = document.querySelector("#file-folder"),
+        bucketFiles = JSON.stringify({
+          "items": [{
+            "name": "home.jpg",
+            "contentType": "image/jpeg",
+            "updated": "2015-02-04T17:45:25.945Z",
+            "mediaLink": "https://url.to.home.jpg"
+          },
+          {
+            "name": "turtle.gif",
+            "contentType": "image/gif",
+            "updated": "2015-02-04T17:46:31.263Z",
+            "mediaLink": "https://url.to.turtle.gif"
+          }]
+        }),
+        folderFile = JSON.stringify({
+          "items": [{
+            "name": "my-folder/home.jpg",
+            "contentType": "image/jpeg",
+            "updated": "2015-02-04T17:45:25.945Z",
+            "mediaLink": "https://url.to.home.jpg"
+          }]
+        });
+
+      suiteSetup(function() {
+        xhr = sinon.useFakeXMLHttpRequest();
+
+        xhr.onCreate = function (xhr) {
+          requests.push(xhr);
+        };
+      });
+
+      suiteTeardown(function() {
+        xhr.restore();
+      });
+
+      setup(function() {
+        requests = [];
+      });
+
+      suite("initialization", function() {
+        test("defaults are correct", function() {
+          assert.equal(invalid.companyId, "");
+          assert.equal(invalid.folder, "");
+          assert.equal(invalid.fileName, "");
+          assert.equal(invalid.fileType, "");
+          assert.equal(invalid.contentType, "");
+          assert.equal(invalid.refresh, 0);
+          assert.equal(invalid.sort, "");
+          assert.equal(invalid.sortDirection, "");
+          assert.equal(invalid.riseCacheUrl, "http://localhost:9494/?url=");
+        });
+
+        test("Storage URLs have the expected values", function() {
+          assert.equal(invalid.url, "");
+          assert.equal(bucket.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F");
+          assert.equal(folder.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=my-folder/");
+          assert.equal(file.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/circle.png");
+          assert.equal(fileFolder.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=my-folder/circle.png");
+        });
+      });
+
+      suite("requests", function() {
+        test("should not make a request before ping request has returned", function(done) {
+          bucket.pingReceived = false;
+          bucket.go();
+
+          assert.equal(requests.length, 0);
+          done();
+        });
+
+        test("should get files in a bucket", function(done) {
+          listener = function(response) {
+            assert.equal(response.detail.files.length, 2);
+            bucket.removeEventListener("rise-storage-response", listener);
+          };
+
+          bucket.addEventListener("rise-storage-response", listener);
+          bucket.pingReceived = true;
+          bucket.go();
+          requests[0].respond(200, header, bucketFiles);
+          done();
+        });
+
+        test("should get files in a folder", function(done) {
+          listener = function(response) {
+            assert.equal(response.detail.files.length, 8);
+            folder.removeEventListener("rise-storage-response", listener);
+          };
+
+          folder.addEventListener("rise-storage-response", listener);
+          folder.go();
+          requests[0].respond(200, header, folderFiles);
+          done();
+        });
+
+        test("should get a specific file in a bucket", function(done) {
+          listener = function(response) {
+            assert.equal(response.detail.files.length, 1);
+            file.removeEventListener("rise-storage-response", listener);
+          };
+
+          file.addEventListener("rise-storage-response", listener);
+          file.go();
+          requests[0].respond(200, header, bucketFile);
+          done();
+        });
+
+        test("should get a specific file in a folder", function(done) {
+          listener = function(response) {
+            assert.equal(response.detail.files.length, 1);
+            fileFolder.removeEventListener("rise-storage-response", listener);
+          };
+
+          fileFolder.addEventListener("rise-storage-response", listener);
+          fileFolder.go();
+          requests[0].respond(200, header, folderFile);
+          done();
+        });
+
+        test("should use correct URL after attribute change", function(done) {
+          folder.setAttribute("fileName", "circle.png");
+          folder.go();
+          assert.equal(folder.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=my-folder/circle.png");
+          folder.removeAttribute("fileName");
+          done();
+        });
+      });
+
+      suite("response", function() {
+        var responded;
+
+        setup(function() {
+          responded = false;
+        });
+
+        test("should fire rise-storage-response on success", function(done) {
+          listener = function(response) {
+            responded = true;
+            bucket.removeEventListener("rise-storage-response", listener);
+          };
+
+          bucket.addEventListener("rise-storage-response", listener);
+          bucket.go();
+          requests[0].respond(200, header, bucketFile);
+          assert.isTrue(responded);
+          done();
+        });
+
+        test("should not fire rise-storage-response on failure", function(done) {
+          listener = function(response) {
+            responded = true;
+            bucket.removeEventListener("rise-storage-response", listener);
+          };
+
+          bucket.addEventListener("rise-storage-response", listener);
+          bucket.go();
+          requests[0].respond(404, header, bucketFile);
+          assert.isFalse(responded);
+          done();
+        });
+      });
+    });
+  </script>
+</body>
+</html>

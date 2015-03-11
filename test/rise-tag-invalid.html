@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>Tagging - Invalid Attributes</title>
+
+  <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../rise-storage.html">
+  <link rel="import" href="../../rise-tag/rise-tag.html">
+</head>
+<body>
+  <rise-storage id="noType" companyId="abc123" folder="my-folder">
+    <rise-tag name="brand"></rise-tag>
+  </rise-storage>
+
+  <rise-storage id="noName" companyId="abc123" folder="my-folder">
+    <rise-tag type="lookup"></rise-tag>
+  </rise-storage>
+
+  <rise-storage id="invalidType" companyId="abc123" folder="my-folder">
+    <rise-tag type="invalid" name="brand"></rise-tag>
+  </rise-storage>
+
+  <script src="js/rise-tag-data.js"></script>
+  <script>
+    suite("invalid attributes", function() {
+      var noType = document.querySelector("#noType"),
+        noName = document.querySelector("#noName"),
+        invalidType = document.querySelector("#invalidType");
+
+      suiteSetup(function() {
+        xhr = sinon.useFakeXMLHttpRequest();
+
+        xhr.onCreate = function (xhr) {
+          requests.push(xhr);
+        };
+      });
+
+      suiteTeardown(function() {
+        xhr.restore();
+      });
+
+      setup(function() {
+        requests = [];
+      });
+
+      test("should not make a request for no type attribute", function(done) {
+        noType.go();
+
+        assert.equal(requests.length, 0);
+        done();
+      });
+
+      test("should not make a request for no name attribute", function(done) {
+        noName.go();
+
+        assert.equal(requests.length, 0);
+        done();
+      });
+
+      test("should return an empty object for an invalid type", function(done) {
+        listener = function(response) {
+          assert.equal(JSON.stringify(response.detail), "{}");
+
+          invalidType.removeEventListener("rise-storage-response", listener);
+        };
+
+        invalidType.addEventListener("rise-storage-response", listener);
+        invalidType.go();
+        requests[0].respond(200, header, invalidTypeData);
+        done();
+      });
+    });
+  </script>
+</body>
+</html>
