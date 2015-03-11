@@ -4,7 +4,7 @@
 
 The Rise Storage Web Component uses Google’s Storage API to retrieve the URL of a file, or the URLs of all files within a folder, from Rise Storage. If the Rise Cache application is running, it will be utilized for local storage of the files, and the URLs returned by the web component will point to Rise Cache. Otherwise, if Rise Cache is not running, the browser's cache will be utilized.
 
-Single files are only downloaded once and are not subsequently checked for changes. Folders and tagged files are monitored for changes, but a minimum refresh time of 15 minutes is enforced.
+Folders and files are monitored for changes if the `refresh` attribute is set, although a minimum refresh time of 15 minutes is enforced.
 
 ### Filtering
 Files can optionally be filtered by file type or content type. This feature is meant to be used when returning multiple files in a folder, and so will only take effect when a `folder` attribute is specified but not a `fileName`, or if neither a `folder` nor a `fileName` attribute are specified (in which case files in the root bucket would be returned).

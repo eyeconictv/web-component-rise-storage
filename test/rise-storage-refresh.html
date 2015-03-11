@@ -12,13 +12,11 @@
 </head>
 <body>
   <rise-storage id="folder" companyId="abc123" folder="my-folder" refresh="10"></rise-storage>
-  <rise-storage id="file" companyId="abc123" fileName="circle.png" refresh="10"></rise-storage>
 
   <script src="js/rise-storage-data.js"></script>
   <script>
     suite("refresh", function() {
       var folder = document.querySelector("#folder"),
-        file = document.querySelector("#file"),
         clock, pingSpy, timerSpy;
 
       suiteSetup(function() {
@@ -43,16 +41,6 @@
         clock.tick(300000);
         assert(pingSpy.calledOnce);
         assert(timerSpy.calledTwice);
-      });
-
-      test("should not check for changes to a file", function() {
-        pingSpy = sinon.spy(file.$.ping, "go");
-        timerSpy = sinon.spy(file, "startTimer");
-
-        file.startTimer(pingSpy);
-        clock.tick(10000);
-        assert(pingSpy.notCalled);
-        assert(timerSpy.calledOnce);
       });
     });
   </script>
