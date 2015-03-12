@@ -318,7 +318,6 @@
           this.job("refresh", function() {
             this.pingReceived = false;
             this.$.ping.go();
-            this.startTimer();
           }, this.refresh * 60000);
         }
       },
@@ -425,6 +424,7 @@
       handleTaggingError: function(e, resp) {
         console.error("Tagging Error: " + resp.xhr.status + " " + resp.xhr.statusText);
 
+        this.startTimer();
         this.fire("rise-storage-error", resp);
       },
 
@@ -530,6 +530,7 @@
       handleStorageError: function(e, resp) {
         console.error("Storage Error: " + resp.xhr.status + " " + resp.xhr.statusText);
 
+        this.startTimer();
         this.fire("rise-storage-error", resp);
       },
 
