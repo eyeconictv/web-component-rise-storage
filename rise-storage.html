@@ -183,12 +183,7 @@
        * An instance of the element was inserted into the DOM.
        */
       attached: function() {
-        if (this.companyId) {
-          this.$.ping.go();
-        }
-        else {
-          console.error("No companyId provided.");
-        }
+        this.$.ping.go();
       },
 
       /****************************************** COMMON ******************************************/
@@ -338,35 +333,40 @@
           tags = [],
           tag, type, name, value;
 
-        body.companyId = this.companyId;
+        if (this.companyId) {
+          body.companyId = this.companyId;
 
-        // Process each <rise-tag>.
-        for (var i = 0; i < nodes.length; i++) {
-          type = nodes[i].getAttribute("type");
-          name = nodes[i].getAttribute("name");
-          value = nodes[i].getAttribute("value");
+          // Process each <rise-tag>.
+          for (var i = 0; i < nodes.length; i++) {
+            type = nodes[i].getAttribute("type");
+            name = nodes[i].getAttribute("name");
+            value = nodes[i].getAttribute("value");
 
-          // type and name attributes are both required.
-          if (type && name) {
-            tag = {};
-            tag.type = type;
-            tag.name = name;
+            // type and name attributes are both required.
+            if (type && name) {
+              tag = {};
+              tag.type = type;
+              tag.name = name;
 
-            if (value) {
-              tag.value = value;
+              if (value) {
+                tag.value = value;
+              }
+
+              tags.push(tag);
+              body.tags = tags;
             }
-
-            tags.push(tag);
-            body.tags = tags;
+            else {
+              console.error("No type or name attribute specified on <rise-tag> element.");
+            }
           }
-          else {
-            console.error("No type or name attribute specified on <rise-tag> element.");
+
+          if (body.tags && this.pingReceived) {
+            this.body = JSON.stringify(body);
+            this.$.tagging.go();
           }
         }
-
-        if (body.tags && this.pingReceived) {
-          this.body = JSON.stringify(body);
-          this.$.tagging.go();
+        else {
+          console.error("No companyId provided.");
         }
       },
 
@@ -467,6 +467,9 @@
 
           this.url = url;
         }
+        else {
+          console.error("No companyId provided.");
+        }
       },
 
       /**
@@ -474,13 +477,11 @@
        */
       handleStorageResponse: function(e, resp) {
         var self = this,
-          file = null,
+          file = {},
           files = [],
-          response = {};
+          response = null;
 
         if (resp && resp.response && resp.response.items) {
-          response.files = [];
-
           resp.response.items.forEach(function(item) {
             file = {};
 
@@ -509,9 +510,15 @@
               }
             }
           });
-
-          response = this.prepareResponse(files);
         }
+        // A single file stored in the root of a bucket has a different response format.
+        else if (resp && resp.response && resp.response.mediaLink) {
+          file.url = self.isCacheRunning ? self.riseCacheUrl + escape(resp.response.mediaLink) : resp.response.mediaLink;
+
+          files.push(file);
+        }
+
+        response = this.prepareResponse(files);
 
         this.startTimer();
         this.fire("rise-storage-response", response);

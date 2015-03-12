@@ -73,7 +73,7 @@
 
       test("should return an empty object for an invalid folder or file", function(done) {
         listener = function(response) {
-          assert.equal(JSON.stringify(response.detail), "{}");
+          assert.equal(JSON.stringify(response.detail), '{"files":[]}');
 
           invalidFolder.removeEventListener("rise-storage-response", listener);
         };

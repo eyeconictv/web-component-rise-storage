@@ -11,7 +11,7 @@
   <link rel="import" href="../rise-storage.html">
 </head>
 <body>
-  <rise-storage id="invalid"></rise-storage>
+  <rise-storage id="noCompany"></rise-storage>
   <rise-storage id="bucket" companyId="abc123"></rise-storage>
   <rise-storage id="folder" companyId="abc123" folder="my-folder"></rise-storage>
   <rise-storage id="file" companyId="abc123" fileName="circle.png"></rise-storage>
@@ -20,33 +20,11 @@
   <script src="js/rise-storage-data.js"></script>
   <script>
     suite("rise-storage", function() {
-      var invalid = document.querySelector("#invalid"),
+      var noCompany = document.querySelector("#noCompany"),
         bucket = document.querySelector("#bucket"),
         folder = document.querySelector("#folder"),
         file = document.querySelector("#file"),
-        fileFolder = document.querySelector("#file-folder"),
-        bucketFiles = JSON.stringify({
-          "items": [{
-            "name": "home.jpg",
-            "contentType": "image/jpeg",
-            "updated": "2015-02-04T17:45:25.945Z",
-            "mediaLink": "https://url.to.home.jpg"
-          },
-          {
-            "name": "turtle.gif",
-            "contentType": "image/gif",
-            "updated": "2015-02-04T17:46:31.263Z",
-            "mediaLink": "https://url.to.turtle.gif"
-          }]
-        }),
-        folderFile = JSON.stringify({
-          "items": [{
-            "name": "my-folder/home.jpg",
-            "contentType": "image/jpeg",
-            "updated": "2015-02-04T17:45:25.945Z",
-            "mediaLink": "https://url.to.home.jpg"
-          }]
-        });
+        fileFolder = document.querySelector("#file-folder");
 
       suiteSetup(function() {
         xhr = sinon.useFakeXMLHttpRequest();
@@ -66,19 +44,19 @@
 
       suite("initialization", function() {
         test("defaults are correct", function() {
-          assert.equal(invalid.companyId, "");
-          assert.equal(invalid.folder, "");
-          assert.equal(invalid.fileName, "");
-          assert.equal(invalid.fileType, "");
-          assert.equal(invalid.contentType, "");
-          assert.equal(invalid.refresh, 0);
-          assert.equal(invalid.sort, "");
-          assert.equal(invalid.sortDirection, "");
-          assert.equal(invalid.riseCacheUrl, "http://localhost:9494/?url=");
+          assert.equal(noCompany.companyId, "");
+          assert.equal(noCompany.folder, "");
+          assert.equal(noCompany.fileName, "");
+          assert.equal(noCompany.fileType, "");
+          assert.equal(noCompany.contentType, "");
+          assert.equal(noCompany.refresh, 0);
+          assert.equal(noCompany.sort, "");
+          assert.equal(noCompany.sortDirection, "");
+          assert.equal(noCompany.riseCacheUrl, "http://localhost:9494/?url=");
         });
 
         test("Storage URLs have the expected values", function() {
-          assert.equal(invalid.url, "");
+          assert.equal(noCompany.url, "");
           assert.equal(bucket.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F");
           assert.equal(folder.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=my-folder/");
           assert.equal(file.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/circle.png");
@@ -92,6 +70,19 @@
           bucket.go();
 
           assert.equal(requests.length, 0);
+          done();
+        });
+
+        test("should get files when companyId is added dynamically", function(done) {
+          listener = function(response) {
+            assert.equal(response.detail.files.length, 2);
+            noCompany.removeEventListener("rise-storage-response", listener);
+          };
+
+          noCompany.setAttribute("companyId", "abc123");
+          noCompany.addEventListener("rise-storage-response", listener);
+          noCompany.go();
+          requests[0].respond(200, header, bucketFiles);
           done();
         });
 
