@@ -42,7 +42,7 @@
         // Advance clock 5 minutes - startTimer should fire.
         clock.tick(300000);
         assert(pingSpy.calledOnce);
-        assert(timerSpy.calledTwice);
+        assert(timerSpy.calledOnce);
       });
     });
   </script>
