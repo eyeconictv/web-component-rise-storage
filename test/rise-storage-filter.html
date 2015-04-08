@@ -65,9 +65,9 @@
         listener = function(response) {
           assert.equal(response.detail.files.length, 2);
           assert.equal(JSON.stringify(response.detail.files[0]),
-            '{"url":"https://url.to.home.jpg"}');
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media"}');
           assert.equal(JSON.stringify(response.detail.files[1]),
-            '{"url":"https://url.to.circle.png"}');
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media"}');
           contentType.removeEventListener("rise-storage-response", listener);
         };
 
