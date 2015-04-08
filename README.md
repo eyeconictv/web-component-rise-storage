@@ -55,24 +55,12 @@ Rise Storage Web Component works in conjunction with [Rise Vision](http://www.ri
 At this time Chrome is the only browser that this project and Rise Vision supports.
 
 ## Usage
-To use the Rise Storage Web Component, you should first install `webcomponents.js`. The `webcomponents.js` polyfills enable Web Components in (evergreen) browsers that lack native support.
-
-To install with Bower:
-```
-bower install webcomponentsjs
-```
-
-To install with npm:
-```
-npm install webcomponents.js
-```
-
-Next, install the Rise Storage Web Component with Bower:
+To use the Rise Storage Web Component, you should first install it using Bower:
 ```
 bower install https://github.com/Rise-Vision/web-component-rise-storage.git
 ```
 
-Finally, construct your HTML page. You should include `webcomponents.js` before any code that touches the DOM, and load the web component using an HTML Import. For example:
+Next, construct your HTML page. You should include `webcomponents.js` before any code that touches the DOM, and load the web component using an HTML Import. For example:
 ```
 <!DOCTYPE html>
 <html>
@@ -105,6 +93,10 @@ Finally, construct your HTML page. You should include `webcomponents.js` before 
   </body>
 </html>
 ```
+
+You can get the `companyId` by copying the value of the `cid` parameter in the URL when logged into the [Rise Vision platform](http://rva.risevision.com/):
+
+![company-id](https://cloud.githubusercontent.com/assets/1190420/7048788/0835e2e2-dde3-11e4-9b25-8e4365541351.png)
 
 The web component returns a JSON response with the following format:
 ```

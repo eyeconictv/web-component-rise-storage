@@ -37,11 +37,11 @@
       test("should sort in ascending order by name", function(done) {
         listener = function(response) {
           assert.equal(JSON.stringify(response.detail.files[0]),
-            '{"url":"https://url.to.car-ad.mp4"}');
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcar-ad.mp4?alt=media"}');
           assert.equal(JSON.stringify(response.detail.files[1]),
-            '{"url":"https://url.to.south-park.webm"}');
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fsouth-park.webm?alt=media"}');
           assert.equal(JSON.stringify(response.detail.files[2]),
-            '{"url":"https://url.to.walking-dead.ogv"}');
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fwalking-dead.ogv?alt=media"}');
           sorting.removeEventListener("rise-storage-response", listener);
         };
 
@@ -54,11 +54,11 @@
       test("should sort in descending order by name", function(done) {
         listener = function(response) {
           assert.equal(JSON.stringify(response.detail.files[0]),
-            '{"url":"https://url.to.walking-dead.ogv"}');
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fwalking-dead.ogv?alt=media"}');
           assert.equal(JSON.stringify(response.detail.files[1]),
-            '{"url":"https://url.to.south-park.webm"}');
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fsouth-park.webm?alt=media"}');
           assert.equal(JSON.stringify(response.detail.files[2]),
-            '{"url":"https://url.to.car-ad.mp4"}');
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcar-ad.mp4?alt=media"}');
           sorting.removeEventListener("rise-storage-response", listener);
         };
 
@@ -72,11 +72,11 @@
       test("should sort in ascending order by date", function(done) {
         listener = function(response) {
           assert.equal(JSON.stringify(response.detail.files[0]),
-            '{"url":"https://url.to.walking-dead.ogv"}');
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fwalking-dead.ogv?alt=media"}');
           assert.equal(JSON.stringify(response.detail.files[1]),
-            '{"url":"https://url.to.car-ad.mp4"}');
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcar-ad.mp4?alt=media"}');
           assert.equal(JSON.stringify(response.detail.files[2]),
-            '{"url":"https://url.to.south-park.webm"}');
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fsouth-park.webm?alt=media"}');
           sorting.removeEventListener("rise-storage-response", listener);
         };
 
@@ -91,11 +91,11 @@
       test("should sort in descending order by date", function(done) {
         listener = function(response) {
           assert.equal(JSON.stringify(response.detail.files[0]),
-            '{"url":"https://url.to.south-park.webm"}');
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fsouth-park.webm?alt=media"}');
           assert.equal(JSON.stringify(response.detail.files[1]),
-            '{"url":"https://url.to.car-ad.mp4"}');
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcar-ad.mp4?alt=media"}');
           assert.equal(JSON.stringify(response.detail.files[2]),
-            '{"url":"https://url.to.walking-dead.ogv"}');
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fwalking-dead.ogv?alt=media"}');
           sorting.removeEventListener("rise-storage-response", listener);
         };
 
@@ -124,11 +124,11 @@
       test("should sort in ascending order when no sortDirection is specified", function(done) {
         listener = function(response) {
           assert.equal(JSON.stringify(response.detail.files[0]),
-            '{"url":"https://url.to.walking-dead.ogv"}');
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fwalking-dead.ogv?alt=media"}');
           assert.equal(JSON.stringify(response.detail.files[1]),
-            '{"url":"https://url.to.car-ad.mp4"}');
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcar-ad.mp4?alt=media"}');
           assert.equal(JSON.stringify(response.detail.files[2]),
-            '{"url":"https://url.to.south-park.webm"}');
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fsouth-park.webm?alt=media"}');
           sorting.removeEventListener("rise-storage-response", listener);
         };
 

@@ -73,9 +73,9 @@
         listener = function(response) {
           assert.equal(response.detail.files.length, 8);
           assert.equal(JSON.stringify(response.detail.files[0]),
-            '{"url":"http://localhost:9494/?url=https%3A//url.to.home.jpg"}');
+            '{"url":"http://localhost:9494/?url=https%3A//www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%252Fhome.jpg?alt=media"}');
           assert.equal(JSON.stringify(response.detail.files[1]),
-            '{"url":"http://localhost:9494/?url=https%3A//url.to.circle.png"}');
+            '{"url":"http://localhost:9494/?url=https%3A//www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%252Fcircle.png?alt=media"}');
           folder.removeEventListener("rise-storage-response", listener);
         };
 
@@ -91,7 +91,7 @@
         listener = function(response) {
           assert.equal(response.detail.files.length, 1);
           assert.equal(JSON.stringify(response.detail.files[0]),
-            '{"url":"http://localhost:9494/?url=https%3A//url.to.home.jpg"}');
+            '{"url":"http://localhost:9494/?url=https%3A//www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%252Fhome.jpg?alt=media"}');
           file.removeEventListener("rise-storage-response", listener);
         };
 
