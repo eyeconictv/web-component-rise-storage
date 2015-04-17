@@ -70,12 +70,12 @@
       });
 
       test("should return Rise Cache URLs for multiple files in a folder", function(done) {
-        listener = function(response) {
+        var listener = function(response) {
           assert.equal(response.detail.files.length, 8);
-          assert.equal(JSON.stringify(response.detail.files[0]),
-            '{"url":"http://localhost:9494/?url=https%3A//www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%252Fhome.jpg?alt=media"}');
-          assert.equal(JSON.stringify(response.detail.files[1]),
-            '{"url":"http://localhost:9494/?url=https%3A//www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%252Fcircle.png?alt=media"}');
+          assert.include(JSON.stringify(response.detail.files[0]),
+            '{"url":"http://localhost:9494/?url=https%3A//www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%252Fhome.jpg?alt=media&cb=');
+          assert.include(JSON.stringify(response.detail.files[1]),
+            '{"url":"http://localhost:9494/?url=https%3A//www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%252Fcircle.png?alt=media&cb=');
           folder.removeEventListener("rise-storage-response", listener);
         };
 
@@ -88,10 +88,10 @@
       });
 
       test("should return Rise Cache URLs for a specific file in a bucket", function(done) {
-        listener = function(response) {
+        var listener = function(response) {
           assert.equal(response.detail.files.length, 1);
-          assert.equal(JSON.stringify(response.detail.files[0]),
-            '{"url":"http://localhost:9494/?url=https%3A//www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%252Fhome.jpg?alt=media"}');
+          assert.include(JSON.stringify(response.detail.files[0]),
+            '{"url":"http://localhost:9494/?url=https%3A//www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg?alt=media&cb=');
           file.removeEventListener("rise-storage-response", listener);
         };
 

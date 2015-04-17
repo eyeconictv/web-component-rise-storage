@@ -121,6 +121,15 @@
       sortDirection: "",
 
       /**
+       * Indicates whether or not the component is loading.
+       *
+       * @property isLoading
+       * @type boolean
+       * @default true
+       */
+      isLoading: true,
+
+      /**
        * The URL target of the request.
        *
        * @property url
@@ -128,6 +137,15 @@
        * @default ""
        */
       url: "",
+
+      /**
+       * Stores item details from the previous request.
+       *
+       * @property items
+       * @type object
+       * @default []
+       */
+      items: [],
 
       /**
        * The base URL for Rise Cache.
@@ -474,7 +492,8 @@
           file = {},
           files = [],
           response = null,
-          suffix = "?alt=media";
+          previousItem = null,
+          suffix = "?alt=media&cb=" + new Date().getTime();
 
         if (resp && resp.response && resp.response.items) {
           resp.response.items.forEach(function(item) {
@@ -497,22 +516,93 @@
                   }
                 }
 
-                file.url = self.isCacheRunning ? (self.riseCacheUrl + escape(item.selfLink) + suffix) : (item.selfLink + suffix);
+                // Construct URL.
+                file.url = self.isCacheRunning ? (self.riseCacheUrl + escape(item.selfLink) + suffix) :
+                  (item.selfLink + suffix);
+
+                // Initial load
+                if (self.isLoading) {
+                  self.items.push({
+                    "name": item.name,
+                    "etag": item.etag,
+                    "url": file.url
+                  });
+                }
+                else {
+                  previousItem = _.find(self.items, function(obj) {
+                    return obj.name === item.name;
+                  });
+
+                  // New file
+                  if (previousItem === undefined) {
+                    self.items.push({
+                      "name": item.name,
+                      "etag": item.etag,
+                      "url": file.url
+                    });
+                  }
+                  // Existing file
+                  else {
+                    if (item.etag) {
+                      // File hasn't changed; use the same URL as before in order to leverage caching.
+                      if (item.etag === previousItem.etag) {
+                        file.url = previousItem.url;
+                      }
+                      // File has changed.
+                      else {
+                        previousItem.url = file.url;
+                        previousItem.etag = item.etag;
+                      }
+                    }
+                    // No etag
+                    else {
+                      previousItem.url = file.url;
+                      previousItem.etag = "";
+                    }
+                  }
+                }
 
                 files.push(file);
               }
             }
           });
+
+          self.isLoading = false;
         }
         // A single file stored in the root of a bucket has a different response format.
         else if (resp && resp.response && resp.response.selfLink) {
-          file.url = self.isCacheRunning ? (self.riseCacheUrl + escape(resp.response.selfLink) + suffix) : (resp.response.selfLink + suffix);
+          file.url = self.isCacheRunning ? (self.riseCacheUrl + escape(resp.response.selfLink) + suffix) :
+            (resp.response.selfLink + suffix);
+
+          // Initial load
+          if (self.isLoading) {
+            self.items.push({
+              "name": resp.response.name,
+              "etag": resp.response.etag,
+              "url": file.url
+            });
+
+            self.isLoading = false;
+          }
+          else {
+            if (resp.response.etag) {
+              // File hasn't changed.
+              if (resp.response.etag === self.items[0].etag) {
+                this.startTimer();
+                return;
+              }
+              // File has changed.
+              else {
+                self.items[0].url = file.url;
+                self.items[0].etag = resp.response.etag;
+              }
+            }
+          }
 
           files.push(file);
         }
 
         response = this.prepareResponse(files);
-
         this.startTimer();
         this.fire("rise-storage-response", response);
       },
