@@ -57,7 +57,7 @@
         });
 
       test("should fire rise-storage-error for an invalid companyId", function(done) {
-        var responded;
+        var responded, listener;
 
         listener = function(response) {
           responded = true;
@@ -72,7 +72,7 @@
       });
 
       test("should return an empty object for an invalid folder or file", function(done) {
-        listener = function(response) {
+        var listener = function(response) {
           assert.equal(JSON.stringify(response.detail), '{"files":[]}');
 
           invalidFolder.removeEventListener("rise-storage-response", listener);
@@ -85,7 +85,7 @@
       });
 
       test("should not return any files for an invalid file type", function(done) {
-        listener = function(response) {
+        var listener = function(response) {
           assert.equal(response.detail.files.length, 0);
 
           invalidFileType.removeEventListener("rise-storage-response", listener);
@@ -98,7 +98,7 @@
       });
 
       test("should not return any files for an invalid content type", function(done) {
-        listener = function(response) {
+        var listener = function(response) {
           assert.equal(response.detail.files.length, 0);
 
           invalidContentType.removeEventListener("rise-storage-response", listener);
@@ -111,13 +111,13 @@
       });
 
       test("should not sort files for an invalid sort", function(done) {
-        listener = function(response) {
-          assert.equal(JSON.stringify(response.detail.files[0]),
-            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcar-ad.mp4?alt=media"}');
-          assert.equal(JSON.stringify(response.detail.files[1]),
-            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fwalking-dead.ogv?alt=media"}');
-          assert.equal(JSON.stringify(response.detail.files[2]),
-            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fsouth-park.webm?alt=media"}');
+        var listener = function(response) {
+          assert.include(JSON.stringify(response.detail.files[0]),
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcar-ad.mp4?alt=media&cb=');
+          assert.include(JSON.stringify(response.detail.files[1]),
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fwalking-dead.ogv?alt=media&cb=');
+          assert.include(JSON.stringify(response.detail.files[2]),
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fsouth-park.webm?alt=media&cb=');
 
           invalidSort.removeEventListener("rise-storage-response", listener);
         };
@@ -129,13 +129,13 @@
       });
 
       test("should sort files in ascending order for an invalid sort direction", function(done) {
-        listener = function(response) {
-          assert.equal(JSON.stringify(response.detail.files[0]),
-            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcar-ad.mp4?alt=media"}');
-          assert.equal(JSON.stringify(response.detail.files[1]),
-            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fsouth-park.webm?alt=media"}');
-          assert.equal(JSON.stringify(response.detail.files[2]),
-            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fwalking-dead.ogv?alt=media"}');
+        var listener = function(response) {
+          assert.include(JSON.stringify(response.detail.files[0]),
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcar-ad.mp4?alt=media&cb=');
+          assert.include(JSON.stringify(response.detail.files[1]),
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fsouth-park.webm?alt=media&cb=');
+          assert.include(JSON.stringify(response.detail.files[2]),
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fwalking-dead.ogv?alt=media&cb=');
 
           invalidSortDirection.removeEventListener("rise-storage-response", listener);
         };

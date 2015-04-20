@@ -1,66 +1,76 @@
 var header = { "Content-Type": "text/json" },
   folderFiles = JSON.stringify({
     "items": [{
-      "name": "my-folder/",
+      "name": "images/",
       "contentType": "text/plain",
       "updated": "2015-02-04T17:44:00.549Z",
-      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2F"
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2F",
+      "etag": "CIjxrtzryMMCEAE="
     },
     {
-      "name": "my-folder/home.jpg",
+      "name": "images/home.jpg",
       "contentType": "image/jpeg",
       "updated": "2015-02-04T17:45:25.945Z",
-      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg"
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg",
+      "etag": "COjLvarr/cQCEAE="
     },
     {
-      "name": "my-folder/circle.png",
+      "name": "images/circle.png",
       "contentType": "image/png",
       "updated": "2015-02-06T14:25:11.312Z",
-      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png"
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png",
+      "etag": "CMiEudSn2MMCEAs="
     },
     {
-      "name": "my-folder/my-image.bmp",
+      "name": "images/my-image.bmp",
       "contentType": "image/bmp",
       "updated": "2015-02-06T11:24:13.313Z",
-      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fmy-image.bmp"
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fmy-image.bmp",
+      "etag": "CJi3zten2MMCEA0="
     },
     {
-      "name": "my-folder/golf.svg",
+      "name": "images/golf.svg",
       "contentType": "image/svg+xml",
       "updated": "2015-01-30T08:19:09.263Z",
-      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fgolf.svg"
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fgolf.svg",
+      "etag": "CPjC1qHc7MQCEAE="
     },
     {
-      "name": "my-folder/turtle.gif",
+      "name": "images/turtle.gif",
       "contentType": "image/gif",
       "updated": "2015-02-04T17:46:31.263Z",
-      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fturtle.gif"
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fturtle.gif",
+      "etag": "CLCKypbW/cQCEAE="
     },
     {
-      "name": "my-folder/car-ad.mp4",
+      "name": "images/car-ad.mp4",
       "contentType": "video/mp4",
       "updated": "2015-02-02T10:03:11.263Z",
-      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcar-ad.mp4"
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcar-ad.mp4",
+      "etag": "CKCa+Y2nq8MCEAM="
     },
     {
-      "name": "my-folder/walking-dead.ogv",
+      "name": "images/walking-dead.ogv",
       "contentType": "video/ogg",
       "updated": "2015-02-01T09:08:15.263Z",
-      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fwalking-dead.ogv"
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fwalking-dead.ogv",
+      "etag": "CJC2jJrFqsMCEAE="
     },
     {
-      "name": "my-folder/south-park.webm",
+      "name": "images/south-park.webm",
       "contentType": "video/webm",
       "updated": "2015-02-03T19:13:45.263Z",
-      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fsouth-park.webm"
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fsouth-park.webm",
+      "etag": "CLDO+JDspcMCEAE="
     }]
   }),
   folderFile = JSON.stringify({
     "items": [{
-      "name": "my-folder/home.jpg",
+      "name": "images/home.jpg",
       "contentType": "image/jpeg",
       "updated": "2015-02-04T17:45:25.945Z",
-      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg"
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg",
+      "etag": "COjLvarr/cQCEAE="
     }]
   }),
   bucketFiles = JSON.stringify({
@@ -68,20 +78,23 @@ var header = { "Content-Type": "text/json" },
       "name": "home.jpg",
       "contentType": "image/jpeg",
       "updated": "2015-02-04T17:45:25.945Z",
-      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg"
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg",
+      "etag": "COjLvarr/cQCEAE="
     },
     {
       "name": "turtle.gif",
       "contentType": "image/gif",
       "updated": "2015-02-04T17:46:31.263Z",
-      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fturtle.gif"
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fturtle.gif",
+      "etag": "CLCKypbW/cQCEAE="
     }]
   }),
   bucketFile = JSON.stringify({
     "name": "home.jpg",
     "contentType": "image/jpeg",
     "updated": "2015-02-04T17:45:25.945Z",
-    "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg"
+    "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg",
+    "etag": "COjLvarr/cQCEAE="
   }),
   invalidCompanyData = JSON.stringify({
     "error": {

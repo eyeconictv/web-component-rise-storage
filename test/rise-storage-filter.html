@@ -37,7 +37,7 @@
       });
 
       test("should return only image files when filtering by fileType", function(done) {
-        listener = function(response) {
+        var listener = function(response) {
           assert.equal(response.detail.files.length, 5);
           fileType.removeEventListener("rise-storage-response", listener);
         };
@@ -49,7 +49,7 @@
       });
 
       test("should return only video files when filtering by fileType", function(done) {
-        listener = function(response) {
+        var listener = function(response) {
           assert.equal(response.detail.files.length, 3);
           fileType.removeEventListener("rise-storage-response", listener);
         };
@@ -62,12 +62,12 @@
       });
 
       test("should return only .jpg and .png files when filtering by contentType", function(done) {
-        listener = function(response) {
+        var listener = function(response) {
           assert.equal(response.detail.files.length, 2);
-          assert.equal(JSON.stringify(response.detail.files[0]),
-            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media"}');
-          assert.equal(JSON.stringify(response.detail.files[1]),
-            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media"}');
+          assert.include(JSON.stringify(response.detail.files[0]),
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media&cb=');
+          assert.include(JSON.stringify(response.detail.files[1]),
+            '{"url":"https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media&cb=');
           contentType.removeEventListener("rise-storage-response", listener);
         };
 
