@@ -1,4 +1,27 @@
 var header = { "Content-Type": "text/json" },
+  folderImages = JSON.stringify({
+    "items": [{
+      "name": "images/",
+      "contentType": "text/plain",
+      "updated": "2015-02-04T17:44:00.549Z",
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2F",
+      "etag": "CIjxrtzryMMCEAE="
+    },
+    {
+      "name": "images/home.jpg",
+      "contentType": "image/jpeg",
+      "updated": "2015-02-04T17:45:25.945Z",
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg",
+      "etag": "COjLvarr/cQCEAE="
+    },
+    {
+      "name": "images/circle.png",
+      "contentType": "image/png",
+      "updated": "2015-02-06T14:25:11.312Z",
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png",
+      "etag": "CMiEudSn2MMCEAs="
+    }]
+  }),
   folderFiles = JSON.stringify({
     "items": [{
       "name": "images/",
@@ -110,4 +133,4 @@ var header = { "Content-Type": "text/json" },
   invalidFolderData = JSON.stringify({
     "kind": "storage#objects"
   }),
-  xhr, requests, listener;
+  xhr, requests;
