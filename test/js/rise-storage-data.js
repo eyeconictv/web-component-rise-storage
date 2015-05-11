@@ -1,5 +1,5 @@
 var header = { "Content-Type": "text/json" },
-  folderImages = JSON.stringify({
+  images = {
     "items": [{
       "name": "images/",
       "contentType": "text/plain",
@@ -20,9 +20,16 @@ var header = { "Content-Type": "text/json" },
       "updated": "2015-02-06T14:25:11.312Z",
       "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png",
       "etag": "CMiEudSn2MMCEAs="
+    },
+    {
+      "name": "images/my-image.bmp",
+      "contentType": "image/bmp",
+      "updated": "2015-02-06T11:24:13.313Z",
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fmy-image.bmp",
+      "etag": "CJi3zten2MMCEA0="
     }]
-  }),
-  folderFiles = JSON.stringify({
+  },
+  mixedMedia = {
     "items": [{
       "name": "images/",
       "contentType": "text/plain",
@@ -86,8 +93,8 @@ var header = { "Content-Type": "text/json" },
       "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fsouth-park.webm",
       "etag": "CLDO+JDspcMCEAE="
     }]
-  }),
-  folderFile = JSON.stringify({
+  },
+  folderImage = {
     "items": [{
       "name": "images/home.jpg",
       "contentType": "image/jpeg",
@@ -95,42 +102,12 @@ var header = { "Content-Type": "text/json" },
       "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg",
       "etag": "COjLvarr/cQCEAE="
     }]
-  }),
-  bucketFiles = JSON.stringify({
-    "items": [{
-      "name": "home.jpg",
-      "contentType": "image/jpeg",
-      "updated": "2015-02-04T17:45:25.945Z",
-      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg",
-      "etag": "COjLvarr/cQCEAE="
-    },
-    {
-      "name": "turtle.gif",
-      "contentType": "image/gif",
-      "updated": "2015-02-04T17:46:31.263Z",
-      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fturtle.gif",
-      "etag": "CLCKypbW/cQCEAE="
-    }]
-  }),
-  bucketFile = JSON.stringify({
+  },
+  bucketImage = {
     "name": "home.jpg",
     "contentType": "image/jpeg",
     "updated": "2015-02-04T17:45:25.945Z",
     "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg",
     "etag": "COjLvarr/cQCEAE="
-  }),
-  invalidCompanyData = JSON.stringify({
-    "error": {
-      "errors": [{
-        "domain": "global",
-        "reason": "notFound",
-        "message": "Not Found"
-      }],
-      "code": 404,
-      "message": "Not Found"
-    }
-  }),
-  invalidFolderData = JSON.stringify({
-    "kind": "storage#objects"
-  }),
+  },
   xhr, requests;

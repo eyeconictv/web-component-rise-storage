@@ -14,11 +14,13 @@
   <rise-storage id="folder" companyId="abc123" folder="images"></rise-storage>
   <rise-storage id="file" companyId="abc123" fileName="home.jpg"></rise-storage>
   <rise-storage id="file-folder" companyId="abc123" folder="images" fileName="home.jpg"></rise-storage>
+  <rise-storage id="file-type" companyId="abc123" folder="my-folder" fileType="image"></rise-storage>
+  <rise-storage id="content-type" companyId="abc123" folder="my-folder" contentType="image/jpeg image/bmp"></rise-storage>
   <rise-storage id="cache-folder" companyId="abc123" folder="images"></rise-storage>
   <rise-storage id="cache-file" companyId="abc123" fileName="home.jpg"></rise-storage>
   <rise-storage id="cache-file-folder" companyId="abc123" folder="images" fileName="home.jpg"></rise-storage>
-  <rise-storage id="file-type" companyId="abc123" folder="my-folder" fileType="image"></rise-storage>
-  <rise-storage id="content-type" companyId="abc123" folder="my-folder" contentType="image/jpeg image/png"></rise-storage>
+  <rise-storage id="cache-file-type" companyId="abc123" folder="my-folder" fileType="image"></rise-storage>
+  <rise-storage id="cache-content-type" companyId="abc123" folder="my-folder" contentType="image/jpeg image/bmp"></rise-storage>
 
   <script src="js/rise-storage-data.js"></script>
   <script>
@@ -28,13 +30,18 @@
         folder = document.querySelector("#folder"),
         file = document.querySelector("#file"),
         fileFolder = document.querySelector("#file-folder"),
+        fileType = document.querySelector("#file-type"),
+        contentType = document.querySelector("#content-type"),
         cacheFolder = document.querySelector("#cache-folder"),
         cacheFile = document.querySelector("#cache-file"),
         cacheFileFolder = document.querySelector("#cache-file-folder"),
-        fileType = document.querySelector("#file-type"),
-        contentType = document.querySelector("#content-type"),
-        cacheHeader = { "Last-Modified": "Fri, 01 May 2015 15:32:11 GMT" };
+        cacheFileType = document.querySelector("#cache-file-type"),
+        cacheContentType = document.querySelector("#cache-content-type"),
+        baseUrl = "http://localhost:9494/cb=0?url=",
+        cacheHeader = { "Last-Modified": "Fri, 01 May 2015 15:32:11 GMT" },
+        newCacheHeader = { "Last-Modified": "Fri, 24 Apr 2015 15:32:11 GMT" };
 
+      // Runs for every suite.
       suiteSetup(function() {
         xhr = sinon.useFakeXMLHttpRequest();
 
@@ -50,6 +57,7 @@
         clock.restore();
       });
 
+      // Runs for every test.
       setup(function() {
         requests = [];
         responded = false;
@@ -65,7 +73,9 @@
 
           file.addEventListener("rise-storage-response", listener);
           file.go();
-          requests[0].respond(200, header, bucketFile);
+
+          requests[0].respond(200, header, JSON.stringify(bucketImage));
+
           assert.isTrue(responded);
           done();
         });
@@ -73,13 +83,15 @@
         test("should not fire rise-storage-response if the file hasn't changed", function(done) {
           var listener = function(response) {
             responded = true;
-            file.removeEventListener("rise-storage-response", listener);
           };
 
           file.addEventListener("rise-storage-response", listener);
           file.go();
-          requests[0].respond(200, header, bucketFile);
+
+          requests[0].respond(200, header, JSON.stringify(bucketImage));
+
           assert.isFalse(responded);
+          file.removeEventListener("rise-storage-response", listener);
           done();
         });
 
@@ -92,14 +104,12 @@
 
           file.addEventListener("rise-storage-response", listener);
           file.go();
-          requests[0].respond(200, header, JSON.stringify({
-            "name": "home.jpg",
-            "contentType": "image/jpeg",
-            "updated": "2015-02-04T17:45:25.945Z",
-            "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg",
-            "etag": "new"
-          }));
+
+          bucketImage.etag = "new";
+          requests[0].respond(200, header, JSON.stringify(bucketImage));
+
           assert.isTrue(responded);
+          bucketImage.etag = "COjLvarr/cQCEAE=";
           done();
         });
 
@@ -116,7 +126,9 @@
 
           fileFolder.addEventListener("rise-storage-response", listener);
           fileFolder.go();
-          requests[0].respond(200, header, folderFile);
+
+          requests[0].respond(200, header, JSON.stringify(folderImage));
+
           assert.isTrue(responded);
           done();
         });
@@ -124,13 +136,15 @@
         test("should not fire rise-storage-response if the file hasn't changed", function(done) {
           var listener = function(response) {
             responded = true;
-            fileFolder.removeEventListener("rise-storage-response", listener);
           };
 
           fileFolder.addEventListener("rise-storage-response", listener);
           fileFolder.go();
-          requests[0].respond(200, header, folderFile);
+
+          requests[0].respond(200, header, JSON.stringify(folderImage));
+
           assert.isFalse(responded);
+          fileFolder.removeEventListener("rise-storage-response", listener);
           done();
         });
 
@@ -143,20 +157,160 @@
 
           fileFolder.addEventListener("rise-storage-response", listener);
           fileFolder.go();
-          requests[0].respond(200, header, JSON.stringify({
-            "items": [{
-              "name": "images/home.jpg",
-              "contentType": "image/jpeg",
-              "updated": "2015-02-04T17:45:25.945Z",
-              "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg",
-              "etag": "new"
-            }]
-          }));
+
+          folderImage.items[0].etag = "new";
+          requests[0].respond(200, header, JSON.stringify(folderImage));
+
           assert.isTrue(responded);
+          folderImage.items[0].etag = "COjLvarr/cQCEAE=";
           done();
         });
 
         fileFolder.items = [];
+      });
+
+      suite("folder", function() {
+        test("should return the correct URLs for files in a folder", function(done) {
+          var listener = function(response) {
+            responded = true;
+            assert.equal(response.detail.files.length, 3);
+            assert.equal(response.detail.files[0].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media");
+            assert.equal(response.detail.files[1].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media");
+            assert.equal(response.detail.files[2].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fmy-image.bmp?alt=media");
+            folder.removeEventListener("rise-storage-response", listener);
+          };
+
+          folder.addEventListener("rise-storage-response", listener);
+          folder.go();
+
+          requests[0].respond(200, header, JSON.stringify(images));
+
+          assert.isTrue(responded);
+          done();
+        });
+
+        test("should return the same URLs if none of the files have changed", function(done) {
+          var listener = function(response) {
+            responded = true;
+            assert.equal(response.detail.files.length, 3);
+            assert.equal(response.detail.files[0].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media");
+            assert.equal(response.detail.files[1].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media");
+            assert.equal(response.detail.files[2].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fmy-image.bmp?alt=media");
+            folder.removeEventListener("rise-storage-response", listener);
+          };
+
+          folder.addEventListener("rise-storage-response", listener);
+          folder.go();
+
+          requests[0].respond(200, header, JSON.stringify(images));
+
+          assert.isTrue(responded);
+          done();
+        });
+
+        test("should return a new URL if a file has changed", function(done) {
+          var listener = function(response) {
+            responded = true;
+            assert.equal(response.detail.files.length, 3);
+            assert.equal(response.detail.files[1].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media&cb=0");
+            folder.removeEventListener("rise-storage-response", listener);
+          };
+
+          folder.addEventListener("rise-storage-response", listener);
+          folder.go();
+
+          images.items[2].etag = "new";
+          requests[0].respond(200, header, JSON.stringify(images));
+
+          assert.isTrue(responded);
+          done();
+        });
+
+        test("should return URL of a file that has been added to a folder", function(done) {
+          var listener = function(response) {
+            responded = true;
+            assert.equal(response.detail.files.length, 4);
+            assert.equal(response.detail.files[3].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fgolf.svg?alt=media&cb=0");
+            folder.removeEventListener("rise-storage-response", listener);
+          };
+
+          folder.addEventListener("rise-storage-response", listener);
+          folder.go();
+
+          images.items.push({
+            "name": "images/golf.svg",
+            "contentType": "image/svg+xml",
+            "updated": "2015-01-30T08:19:09.263Z",
+            "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fgolf.svg",
+            "etag": "CPjC1qHc7MQCEAE="
+          });
+          requests[0].respond(200, header, JSON.stringify(images));
+
+          assert.isTrue(responded);
+          done();
+        });
+
+        test("should not return URL of a file that has been removed from a folder", function(done) {
+          var listener = function(response) {
+            responded = true;
+            assert.equal(response.detail.files.length, 3);
+            assert.equal(response.detail.files[0].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media");
+            assert.equal(response.detail.files[1].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media&cb=0");
+            assert.equal(response.detail.files[2].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fmy-image.bmp?alt=media");
+            folder.removeEventListener("rise-storage-response", listener);
+          };
+
+          folder.addEventListener("rise-storage-response", listener);
+          folder.go();
+
+          images.items.pop();
+          requests[0].respond(200, header, JSON.stringify(images));
+
+          assert.isTrue(responded);
+          images.items[2].etag = "CMiEudSn2MMCEAs=";
+          done();
+        });
+
+        folder.items = [];
+      });
+
+      suite("filtering", function() {
+        test("should return only images when filtering by fileType", function(done) {
+          listener = function(response) {
+            responded = true;
+            assert.equal(response.detail.files.length, 5);
+            fileType.removeEventListener("rise-storage-response", listener);
+          };
+
+          fileType.addEventListener("rise-storage-response", listener);
+          fileType.go();
+
+          requests[0].respond(200, header, JSON.stringify(mixedMedia));
+
+          assert.isTrue(responded);
+          done();
+        });
+
+        test("should return only image/jpeg and image/bmp files when filtering by contentType", function(done) {
+          listener = function(response) {
+            responded = true;
+            assert.equal(response.detail.files.length, 2);
+            assert.equal(response.detail.files[0].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media");
+            assert.equal(response.detail.files[1].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fmy-image.bmp?alt=media");
+            contentType.removeEventListener("rise-storage-response", listener);
+          };
+
+          contentType.addEventListener("rise-storage-response", listener);
+          contentType.go();
+
+          requests[0].respond(200, header, JSON.stringify(mixedMedia));
+
+          assert.isTrue(responded);
+          done();
+        });
+
+        fileType.items = [];
+        contentType.items = [];
       });
 
       suite("Rise Cache - bucket file", function() {
@@ -168,10 +322,10 @@
           };
 
           cacheFile.isCacheRunning = true;
-
           cacheFile.addEventListener("rise-storage-response", listener);
           cacheFile.go();
-          requests[0].respond(200, header, bucketFile);
+
+          requests[0].respond(200, header, JSON.stringify(bucketImage));
           requests[1].respond(200, cacheHeader, "");
 
           assert.isTrue(responded);
@@ -181,15 +335,16 @@
         test("should not fire rise-storage-response if the file hasn't changed", function(done) {
           var listener = function(response) {
             responded = true;
-            cacheFile.removeEventListener("rise-storage-response", listener);
           };
 
           cacheFile.addEventListener("rise-storage-response", listener);
           cacheFile.go();
-          requests[0].respond(200, header, bucketFile);
+
+          requests[0].respond(200, header, JSON.stringify(bucketImage));
           requests[1].respond(200, cacheHeader, "");
 
           assert.isFalse(responded);
+          cacheFile.removeEventListener("rise-storage-response", listener);
           done();
         });
 
@@ -202,8 +357,10 @@
 
           cacheFile.addEventListener("rise-storage-response", listener);
           cacheFile.go();
-          requests[0].respond(200, header, bucketFile);
-          requests[1].respond(200, { "Last-Modified": "Thu, 23 Apr 2015 09:18:55 GMT" }, "");
+
+          requests[0].respond(200, header, JSON.stringify(bucketImage));
+          requests[1].respond(200, newCacheHeader, "");
+
           assert.isTrue(responded);
           done();
         });
@@ -220,10 +377,10 @@
           };
 
           cacheFileFolder.isCacheRunning = true;
-
           cacheFileFolder.addEventListener("rise-storage-response", listener);
           cacheFileFolder.go();
-          requests[0].respond(200, header, folderFile);
+
+          requests[0].respond(200, header, JSON.stringify(folderImage));
           requests[1].respond(200, cacheHeader, "");
 
           assert.isTrue(responded);
@@ -233,15 +390,16 @@
         test("should not fire rise-storage-response if the file hasn't changed", function(done) {
           var listener = function(response) {
             responded = true;
-            cacheFileFolder.removeEventListener("rise-storage-response", listener);
           };
 
           cacheFileFolder.addEventListener("rise-storage-response", listener);
           cacheFileFolder.go();
-          requests[0].respond(200, header, folderFile);
+
+          requests[0].respond(200, header, JSON.stringify(folderImage));
           requests[1].respond(200, cacheHeader, "");
 
           assert.isFalse(responded);
+          cacheFileFolder.removeEventListener("rise-storage-response", listener);
           done();
         });
 
@@ -254,186 +412,41 @@
 
           cacheFileFolder.addEventListener("rise-storage-response", listener);
           cacheFileFolder.go();
-          requests[0].respond(200, header, folderFiles);
-          requests[1].respond(200, { "Last-Modified": "Thu, 23 Apr 2015 09:18:55 GMT" }, "");
+
+          requests[0].respond(200, header, JSON.stringify(folderImage));
+          requests[1].respond(200, newCacheHeader, "");
+
           assert.isTrue(responded);
           done();
         });
-
-        cacheFileFolder.items = [];
-      });
-
-      suite("folder", function() {
-        test("should return the correct URLs for files in a folder", function(done) {
-          var listener = function(response) {
-            responded = true;
-            assert.equal(response.detail.files[0].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media");
-            assert.equal(response.detail.files[1].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media");
-            folder.removeEventListener("rise-storage-response", listener);
-          };
-
-          folder.addEventListener("rise-storage-response", listener);
-          folder.go();
-          requests[0].respond(200, header, folderImages);
-          assert.isTrue(responded);
-          done();
-        });
-
-        test("should return the same URLs if none of the files have changed", function(done) {
-          var listener = function(response) {
-            responded = true;
-            assert.equal(response.detail.files[0].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media");
-            assert.equal(response.detail.files[1].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media");
-            folder.removeEventListener("rise-storage-response", listener);
-          };
-
-          folder.addEventListener("rise-storage-response", listener);
-          folder.go();
-          requests[0].respond(200, header, folderImages);
-          assert.isTrue(responded);
-          done();
-        });
-
-        test("should return new URL if a file has changed", function(done) {
-          var listener = function(response) {
-            responded = true;
-            assert.equal(response.detail.files[1].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media&cb=0");
-            folder.removeEventListener("rise-storage-response", listener);
-          };
-
-          folder.addEventListener("rise-storage-response", listener);
-          folder.go();
-          requests[0].respond(200, header, JSON.stringify({
-            "items": [{
-              "name": "images/",
-              "contentType": "text/plain",
-              "updated": "2015-02-04T17:44:00.549Z",
-              "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2F",
-              "etag": "CIjxrtzryMMCEAE="
-            },
-            {
-              "name": "images/home.jpg",
-              "contentType": "image/jpeg",
-              "updated": "2015-02-04T17:45:25.945Z",
-              "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg",
-              "etag": "COjLvarr/cQCEAE="
-            },
-            {
-              "name": "images/circle.png",
-              "contentType": "image/png",
-              "updated": "2015-02-06T14:25:11.312Z",
-              "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png",
-              "etag": "new"
-            }]
-          }));
-          assert.isTrue(responded);
-          done();
-        });
-
-        test("should return URL of a file that has been added to a folder", function(done) {
-          var listener = function(response) {
-            responded = true;
-            assert.equal(response.detail.files.length, 3);
-            assert.equal(response.detail.files[2].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fmy-image.bmp?alt=media&cb=0");
-            folder.removeEventListener("rise-storage-response", listener);
-          };
-
-          folder.addEventListener("rise-storage-response", listener);
-          folder.go();
-          requests[0].respond(200, header, JSON.stringify({
-            "items": [{
-              "name": "images/",
-              "contentType": "text/plain",
-              "updated": "2015-02-04T17:44:00.549Z",
-              "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2F",
-              "etag": "CIjxrtzryMMCEAE="
-            },
-            {
-              "name": "images/home.jpg",
-              "contentType": "image/jpeg",
-              "updated": "2015-02-04T17:45:25.945Z",
-              "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg",
-              "etag": "new"
-            },
-            {
-              "name": "images/circle.png",
-              "contentType": "image/png",
-              "updated": "2015-02-06T14:25:11.312Z",
-              "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png",
-              "etag": "new"
-            },
-            {
-              "name": "images/my-image.bmp",
-              "contentType": "image/bmp",
-              "updated": "2015-02-06T11:24:13.313Z",
-              "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fmy-image.bmp",
-              "etag": "CJi3zten2MMCEA0="
-            }]
-          }));
-          assert.isTrue(responded);
-          done();
-        });
-
-        test("should not return URL of a file that has been removed from a folder", function(done) {
-          var listener = function(response) {
-            responded = true;
-            assert.equal(response.detail.files.length, 2);
-            assert.equal(response.detail.files[0].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media&cb=0");
-            assert.equal(response.detail.files[1].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media&cb=0");
-            folder.removeEventListener("rise-storage-response", listener);
-          };
-
-          folder.addEventListener("rise-storage-response", listener);
-          folder.go();
-          requests[0].respond(200, header, JSON.stringify({
-            "items": [{
-              "name": "images/",
-              "contentType": "text/plain",
-              "updated": "2015-02-04T17:44:00.549Z",
-              "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2F",
-              "etag": "CIjxrtzryMMCEAE="
-            },
-            {
-              "name": "images/home.jpg",
-              "contentType": "image/jpeg",
-              "updated": "2015-02-04T17:45:25.945Z",
-              "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg",
-              "etag": "new"
-            },
-            {
-              "name": "images/circle.png",
-              "contentType": "image/png",
-              "updated": "2015-02-06T14:25:11.312Z",
-              "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png",
-              "etag": "new"
-            }]
-          }));
-          assert.isTrue(responded);
-          done();
-        });
-
-        folder.items = [];
       });
 
       suite("Rise Cache - folder", function() {
+        // These tests are somewhat contrived since responseURL needs to be manually set.
         test("should return the correct URLs for files in a folder", function(done) {
           listener = function(response) {
             responded = true;
+            assert.equal(response.detail.files.length, 3);
             assert.equal(response.detail.files[0].url, "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg");
             assert.equal(response.detail.files[1].url, "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fcircle.png");
+            assert.equal(response.detail.files[2].url, "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fmy-image.bmp");
             cacheFolder.removeEventListener("rise-storage-response", listener);
           };
 
           cacheFolder.isCacheRunning = true;
-
           cacheFolder.addEventListener("rise-storage-response", listener);
           cacheFolder.go();
 
-          requests[0].respond(200, header, folderImages);
-          requests[1].responseURL = "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg";
-          requests[2].responseURL = "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fcircle.png";
-          requests[1].respond(200, { "Last-Modified": "Fri, 24 Apr 2015 15:32:11 GMT" }, "");
-          requests[2].respond(200, { "Last-Modified": "Fri, 24 Apr 2015 15:32:11 GMT" }, "");
+          requests[0].respond(200, header, JSON.stringify(images));
+
+          images.items.forEach(function(item, index) {
+            // Not the folder.
+            if (index !== 0) {
+              cacheFolder.setFileUrl(item);
+              requests[index].responseURL = baseUrl + cacheFolder.fileUrl;
+              requests[index].respond(200, cacheHeader, "");
+            }
+          });
 
           assert.isTrue(responded);
           done();
@@ -447,31 +460,49 @@
           cacheFolder.addEventListener("rise-storage-response", listener);
           cacheFolder.go();
 
-          requests[0].respond(200, header, folderImages);
-          requests[1].responseURL = "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg";
-          requests[2].responseURL = "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fcircle.png";
-          requests[1].respond(200, { "Last-Modified": "Fri, 24 Apr 2015 15:32:11 GMT" }, "");
-          requests[2].respond(200, { "Last-Modified": "Fri, 24 Apr 2015 15:32:11 GMT" }, "");
+          requests[0].respond(200, header, JSON.stringify(images));
 
-          cacheFolder.removeEventListener("rise-storage-response", listener);
+          images.items.forEach(function(item, index) {
+            // Not the folder.
+            if (index !== 0) {
+              cacheFolder.setFileUrl(item);
+              requests[index].responseURL = baseUrl + cacheFolder.fileUrl;
+              requests[index].respond(200, cacheHeader, "");
+            }
+          });
+
           assert.isFalse(responded);
+          cacheFolder.removeEventListener("rise-storage-response", listener);
           done();
         });
 
         test("should fire rise-storage-response if a file has changed", function(done) {
           listener = function(response) {
             responded = true;
+            assert.equal(response.detail.files.length, 3);
+            assert.equal(response.detail.files[1].url, "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fcircle.png");
             cacheFolder.removeEventListener("rise-storage-response", listener);
           };
 
           cacheFolder.addEventListener("rise-storage-response", listener);
           cacheFolder.go();
 
-          requests[0].respond(200, header, folderImages);
-          requests[1].responseURL = "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg";
-          requests[2].responseURL = "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fcircle.png";
-          requests[1].respond(200, cacheHeader, "");
-          requests[2].respond(200, { "Last-Modified": "Fri, 24 Apr 2015 15:32:11 GMT" }, "");
+          requests[0].respond(200, header, JSON.stringify(images));
+
+          images.items.forEach(function(item, index) {
+            // Not the folder.
+            if (index !== 0) {
+              cacheFolder.setFileUrl(item);
+              requests[index].responseURL = baseUrl + cacheFolder.fileUrl;
+
+              if (index === 2) {
+                requests[index].respond(200, newCacheHeader, "");
+              }
+              else {
+                requests[index].respond(200, cacheHeader, "");
+              }
+            }
+          });
 
           assert.isTrue(responded);
           done();
@@ -480,50 +511,31 @@
         test("should return URL of a file that has been added to a folder", function(done) {
           listener = function(response) {
             responded = true;
-            assert.equal(response.detail.files.length, 3);
-            assert.equal(response.detail.files[2].url, "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fmy-image.bmp");
+            assert.equal(response.detail.files.length, 4);
+            assert.equal(response.detail.files[3].url, "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fgolf.svg");
             cacheFolder.removeEventListener("rise-storage-response", listener);
           };
 
           cacheFolder.addEventListener("rise-storage-response", listener);
           cacheFolder.go();
 
-          requests[0].respond(200, header, JSON.stringify({
-            "items": [{
-              "name": "images/",
-              "contentType": "text/plain",
-              "updated": "2015-02-04T17:44:00.549Z",
-              "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2F",
-              "etag": "CIjxrtzryMMCEAE="
-            },
-            {
-              "name": "images/home.jpg",
-              "contentType": "image/jpeg",
-              "updated": "2015-02-04T17:45:25.945Z",
-              "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg",
-              "etag": "COjLvarr/cQCEAE="
-            },
-            {
-              "name": "images/circle.png",
-              "contentType": "image/png",
-              "updated": "2015-02-06T14:25:11.312Z",
-              "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png",
-              "etag": "CMiEudSn2MMCEAs="
-            },
-            {
-              "name": "images/my-image.bmp",
-              "contentType": "image/bmp",
-              "updated": "2015-02-06T11:24:13.313Z",
-              "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fmy-image.bmp",
-              "etag": "CJi3zten2MMCEA0="
-            }]
-          }));
-          requests[1].responseURL = "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg";
-          requests[2].responseURL = "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fcircle.png";
-          requests[3].responseURL = "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fmy-image.bmp";
-          requests[1].respond(200, cacheHeader, "");
-          requests[2].respond(200, { "Last-Modified": "Fri, 24 Apr 2015 15:32:11 GMT" }, "");
-          requests[3].respond(200, { "Last-Modified": "Fri, 24 Apr 2015 15:32:11 GMT" }, "");
+          images.items.push({
+            "name": "images/golf.svg",
+            "contentType": "image/svg+xml",
+            "updated": "2015-01-30T08:19:09.263Z",
+            "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fgolf.svg",
+            "etag": "CPjC1qHc7MQCEAE="
+          });
+          requests[0].respond(200, header, JSON.stringify(images));
+
+          images.items.forEach(function(item, index) {
+            // Not the folder.
+            if (index !== 0) {
+              cacheFolder.setFileUrl(item);
+              requests[index].responseURL = baseUrl + cacheFolder.fileUrl;
+              requests[index].respond(200, cacheHeader, "");
+            }
+          });
 
           assert.isTrue(responded);
           done();
@@ -532,26 +544,92 @@
         test("should not return URL of a file that has been removed from a folder", function(done) {
           listener = function(response) {
             responded = true;
-            assert.equal(response.detail.files.length, 2);
+            assert.equal(response.detail.files.length, 3);
             assert.equal(response.detail.files[0].url, "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg");
             assert.equal(response.detail.files[1].url, "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fcircle.png");
+            assert.equal(response.detail.files[2].url, "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fmy-image.bmp");
             cacheFolder.removeEventListener("rise-storage-response", listener);
           };
 
           cacheFolder.addEventListener("rise-storage-response", listener);
           cacheFolder.go();
 
-          requests[0].respond(200, header, folderImages);
-          requests[1].responseURL = "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg";
-          requests[2].responseURL = "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fcircle.png";
-          requests[1].respond(200, cacheHeader, "");
-          requests[2].respond(200, { "Last-Modified": "Fri, 24 Apr 2015 15:32:11 GMT" }, "");
+          images.items.pop();
+          requests[0].respond(200, header, JSON.stringify(images));
+
+          images.items.forEach(function(item, index) {
+            // Not the folder.
+            if (index !== 0) {
+              cacheFolder.setFileUrl(item);
+              requests[index].responseURL = baseUrl + cacheFolder.fileUrl;
+              requests[index].respond(200, cacheHeader, "");
+            }
+          });
+
+          assert.isTrue(responded);
+          done();
+        });
+      });
+
+      suite("Rise Cache - filtering", function() {
+        test("should return only images when filtering by fileType", function(done) {
+          listener = function(response) {
+            responded = true;
+            assert.equal(response.detail.files.length, 5);
+            cacheFileType.removeEventListener("rise-storage-response", listener);
+          };
+
+          cacheFileType.isCacheRunning = true;
+          cacheFileType.addEventListener("rise-storage-response", listener);
+          cacheFileType.go();
+
+          // Storage API
+          requests[0].respond(200, header, JSON.stringify(mixedMedia));
+
+          // Rise Cache
+          for (var i = 0; i < 6; i++) {
+            // Not the folder
+            if (i !== 0) {
+              cacheFileType.setFileUrl(mixedMedia.items[i]);
+              requests[i].responseURL = baseUrl + cacheFileType.fileUrl;
+              requests[i].respond(200, cacheHeader, "");
+            }
+          }
 
           assert.isTrue(responded);
           done();
         });
 
-        cacheFolder.items = [];
+        test("should return only image/jpeg and image/bmp files when filtering by contentType", function(done) {
+          listener = function(response) {
+            responded = true;
+            assert.equal(response.detail.files.length, 2);
+            assert.equal(response.detail.files[0].url, requests[1].responseURL);
+            assert.equal(response.detail.files[1].url, requests[2].responseURL);
+            cacheContentType.removeEventListener("rise-storage-response", listener);
+          };
+
+          cacheContentType.isCacheRunning = true;
+          cacheContentType.addEventListener("rise-storage-response", listener);
+          cacheContentType.go();
+
+          // Storage API
+          requests[0].respond(200, header, JSON.stringify(mixedMedia));
+
+          // Rise Cache
+          // home.jpg
+          cacheContentType.setFileUrl(mixedMedia.items[1]);
+          requests[1].responseURL = baseUrl + cacheContentType.fileUrl;
+          requests[1].respond(200, cacheHeader, "");
+
+          // my-image.bmp
+          cacheContentType.setFileUrl(mixedMedia.items[3]);
+          requests[2].responseURL = baseUrl + cacheContentType.fileUrl;
+          requests[2].respond(200, cacheHeader, "");
+
+          assert.isTrue(responded);
+          done();
+        });
       });
     });
   </script>
