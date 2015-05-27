@@ -4,7 +4,7 @@
 
 The Rise Storage Web Component uses Google’s Storage API to retrieve the URL of a file, or the URLs of all files within a folder, from Rise Storage. If the Rise Cache application is running, it will be utilized for local storage of the files, and the URLs returned by the web component will point to Rise Cache. Otherwise, if Rise Cache is not running, the browser's cache will be utilized.
 
-Folders and files are monitored for changes if the `refresh` attribute is set, although a minimum refresh time of 15 minutes is enforced.
+Folders and files are monitored for changes if the `refresh` attribute is set, although a minimum refresh time of 5 minutes is enforced.
 
 ### Filtering
 Files can optionally be filtered by file type or content type. This feature is meant to be used when returning multiple files in a folder, and so will only take effect when a `folder` attribute is specified but not a `fileName`, or if neither a `folder` nor a `fileName` attribute are specified (in which case files in the root bucket would be returned).
@@ -21,21 +21,6 @@ Alternatively, the `contentType` attribute can be used to filter by a specific c
 <rise-storage companyId="my-company-id" contentType="image/png image/jpeg">
 </rise-storage>
 ```
-
-### Tagging
-Files can optionally be filtered by lookup or freeform tag. If either the `folder` or `fileName` attributes, or both, are specified on the `<rise-storage>` component when there is already one or more tags, the `folder` and `fileName` attributes will be ignored. All other attributes are supported.
-
-To filter by tagged files, a `rise-tag` element is nested inside of a `rise-storage` element. Multiple `rise-tag` elements can be added.
-
-#### Example
-```
-<rise-storage companyId="my-company-id">
-  <rise-tag type="lookup" name="brand" value="levi"></rise-tag>
-  <rise-tag type="freeform" name="discount"></rise-tag>
-</rise-storage>
-```
-
-Please see the [rise-tag ReadMe](https://github.com/Rise-Vision/web-component-rise-tag) for more information about its attributes and usage.
 
 ### Sorting
 Files can optionally be sorted by filename, modified date or randomly. This feature is meant to be used when returning multiple files in a folder, and so will only take effect when a `folder` attribute is specified but not a `fileName`, or if neither a `folder` nor a `fileName` attribute are specified (in which case files in the root bucket would be returned).
@@ -103,18 +88,6 @@ The web component returns a JSON response with the following format:
 {
   "files": [
     "url": "http://url.to.file",
-    "tags": [
-      {
-        "type": "LOOKUP",
-        "name": "brand",
-        "value": "list"
-      },
-      {
-        "type": "FREEFORM",
-        "name": "hotel #",
-        "value": "123123"
-      }
-    ],
     "timeline": {
       carryon: "false",
       duration: 60,
@@ -142,7 +115,7 @@ The web component returns a JSON response with the following format:
 | `contentType`          | `<string>` A specific media type (e.g. `image/png` or `video/mp4`).             | `''`             |
 | `sort`                 | `<string>` One of `name`, `date` or `random`.                                   | `''`             |
 | `sortDirection`        | `<string>` Either `asc` or `desc`.                                              | `''` (or `asc` if `sort` is `name` or `date`)|
-| `refresh`              | `<number>` The number of minutes before Storage will be checked for changes. The minimum refresh time is 15 minutes. | `0` (no refresh) |
+| `refresh`              | `<number>` The number of minutes before Storage will be checked for changes. The minimum refresh time is 5 minutes. | `0` (no refresh) |
 
 ### Properties
 | Property         | Type                                              | Default |

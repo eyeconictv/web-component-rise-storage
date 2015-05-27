@@ -21,7 +21,6 @@
   "dependencies": {
     "core-ajax": "Polymer/core-ajax#~0.5.5",
     "polymer": "Polymer/polymer#~0.5.5",
-    "rise-tag": "https://github.com/Rise-Vision/web-component-rise-tag.git",
     "underscore": "~1.8.2"
   },
   "devDependencies": {
