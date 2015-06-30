@@ -19,11 +19,11 @@
     "test"
   ],
   "dependencies": {
-    "core-ajax": "Polymer/core-ajax#~0.5.5",
-    "polymer": "Polymer/polymer#~0.5.5",
-    "underscore": "~1.8.2"
+    "iron-ajax": "PolymerElements/iron-ajax#^1.0.0",
+    "polymer": "#^1.0.0",
+    "underscore": "~1.8.3"
   },
   "devDependencies": {
-    "web-component-tester": "~2.2.5"
+    "web-component-tester": "~3.1.3"
   }
 }

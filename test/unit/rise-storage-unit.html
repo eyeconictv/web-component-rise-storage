@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <title>rise-storage</title>
 
-  <script src="../../webcomponentsjs/webcomponents.min.js"></script>
-  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../../webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../../web-component-tester/browser.js"></script>
 
-  <link rel="import" href="../rise-storage.html">
+  <link rel="import" href="../../rise-storage.html">
 </head>
 <body>
   <rise-storage id="noCompany"></rise-storage>
@@ -22,7 +22,7 @@
   <rise-storage id="image-file-type" companyId="abc123" folder="images" fileType="image"></rise-storage>
   <rise-storage id="video-file-type" companyId="abc123" folder="images" fileType="video"></rise-storage>
 
-  <script src="js/rise-storage-data.js"></script>
+  <script src="../js/rise-storage-data.js"></script>
   <script>
     suite("rise-storage", function() {
       var responded,
@@ -64,54 +64,54 @@
       suite("ready", function() {
         test("should set the number of supported image types", function() {
           bucket.ready();
-          assert.equal(bucket.images.length, 5);
+          assert.equal(bucket._images.length, 5);
         });
 
         test("should set the number of supported video types", function() {
           bucket.ready();
-          assert.equal(bucket.videos.length, 3);
+          assert.equal(bucket._videos.length, 3);
         });
 
         test("should parse the contentType attribute", function() {
           contentType.ready();
-          assert.equal(contentType.contentTypes.length, 2);
+          assert.equal(contentType._contentTypes.length, 2);
         });
       });
 
-      suite("setStorageUrl", function() {
+      suite("_computeStorageUrl", function() {
         test("should correctly set Storage request URL if no companyId attribute is specified", function() {
-          noCompany.setStorageUrl();
-          assert.equal(noCompany.storageUrl, "");
+          noCompany._computeStorageUrl();
+          assert.equal(noCompany.$.storage.url, "");
         });
 
         test("should correctly set Storage request URL for a folder", function() {
-          folder.setStorageUrl();
-          assert.equal(folder.storageUrl, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=images/");
+          folder._computeStorageUrl();
+          assert.equal(folder.$.storage.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=images/");
         });
 
         test("should correctly set Storage request URL for a file in a folder", function() {
-          fileFolder.setStorageUrl();
-          assert.equal(fileFolder.storageUrl, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=images/home.jpg");
+          fileFolder._computeStorageUrl();
+          assert.equal(fileFolder.$.storage.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=images/home.jpg");
         });
 
         test("should correctly set Storage request URL for a bucket", function() {
-          bucket.setStorageUrl();
-          assert.equal(bucket.storageUrl, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F");
+          bucket._computeStorageUrl();
+          assert.equal(bucket.$.storage.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F");
         });
 
         test("should correctly set Storage request URL for a file in a bucket", function() {
-          fileBucket.setStorageUrl();
-          assert.equal(fileBucket.storageUrl, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg");
+          fileBucket._computeStorageUrl();
+          assert.equal(fileBucket.$.storage.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg");
         });
 
         test("should correctly set Storage request URL for a folder that ends with a /", function() {
           folder.setAttribute("folder", "images/");
-          folder.setStorageUrl();
-          assert.equal(folder.storageUrl, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=images%2F");
+          folder._computeStorageUrl();
+          assert.equal(folder.$.storage.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=images%2F");
         });
       });
 
-      suite("handleStorageError", function() {
+      suite("_handleStorageError", function() {
         test("should fire rise-storage-error if there is a problem with the Storage request", function(done) {
           var resp = {
             "xhr": {
@@ -125,13 +125,13 @@
           };
 
           fileBucket.addEventListener("rise-storage-error", listener);
-          fileBucket.handleStorageError({}, resp);
+          fileBucket._handleStorageError({}, resp);
           assert.isTrue(responded);
           done();
         });
       });
 
-      suite("handleStorageFile", function() {
+      suite("_handleStorageFile", function() {
         suite("bucket file", function() {
           var url = bucketImage.selfLink;
 
@@ -143,8 +143,8 @@
             };
 
             fileBucket.addEventListener("rise-storage-response", listener);
-            fileBucket.fileUrl = url + suffix;
-            fileBucket.handleStorageFile(bucketImage);
+            fileBucket._fileUrl = url + suffix;
+            fileBucket._handleStorageFile(bucketImage);
 
             assert.isTrue(responded);
             done();
@@ -156,7 +156,7 @@
             };
 
             fileBucket.addEventListener("rise-storage-response", listener);
-            fileBucket.handleStorageFile(bucketImage);
+            fileBucket._handleStorageFile(bucketImage);
             fileBucket.removeEventListener("rise-storage-response", listener);
 
             assert.isFalse(responded);
@@ -172,14 +172,14 @@
 
             bucketImage.etag = "new";
             fileBucket.addEventListener("rise-storage-response", listener);
-            fileBucket.handleStorageFile(bucketImage);
+            fileBucket._handleStorageFile(bucketImage);
 
             assert.isTrue(responded);
             bucketImage.etag = "COjLvarr/cQCEAE=";
             done();
           });
 
-          fileBucket.items = [];
+          fileBucket._items = [];
         });
 
         suite("folder file", function() {
@@ -193,8 +193,8 @@
             };
 
             fileFolder.addEventListener("rise-storage-response", listener);
-            fileFolder.fileUrl = url + suffix;
-            fileFolder.handleStorageFile(folderImage);
+            fileFolder._fileUrl = url + suffix;
+            fileFolder._handleStorageFile(folderImage);
 
             assert.isTrue(responded);
             done();
@@ -206,7 +206,7 @@
             };
 
             fileFolder.addEventListener("rise-storage-response", listener);
-            fileFolder.handleStorageFile(folderImage);
+            fileFolder._handleStorageFile(folderImage);
             fileFolder.removeEventListener("rise-storage-response", listener);
 
             assert.isFalse(responded);
@@ -222,18 +222,18 @@
 
             folderImage.items[0].etag = "new";
             fileFolder.addEventListener("rise-storage-response", listener);
-            fileFolder.handleStorageFile(folderImage);
+            fileFolder._handleStorageFile(folderImage);
 
             assert.isTrue(responded);
             folderImage.items[0].etag = "COjLvarr/cQCEAE=";
             done();
           });
 
-          fileFolder.items = [];
+          fileFolder._items = [];
         });
       });
 
-      suite("handleStorageFolder", function() {
+      suite("_handleStorageFolder", function() {
         test("should return the correct URLs for files in a folder", function(done) {
           listener = function(response) {
             responded = true;
@@ -245,7 +245,7 @@
           };
 
           folder.addEventListener("rise-storage-response", listener);
-          folder.handleStorageFolder(images);
+          folder._handleStorageFolder(images);
 
           assert.isTrue(responded);
           done();
@@ -262,7 +262,7 @@
           };
 
           folder.addEventListener("rise-storage-response", listener);
-          folder.handleStorageFolder(images);
+          folder._handleStorageFolder(images);
 
           assert.isTrue(responded);
           done();
@@ -278,7 +278,7 @@
 
           images.items[2].etag = "new";
           folder.addEventListener("rise-storage-response", listener);
-          folder.handleStorageFolder(images);
+          folder._handleStorageFolder(images);
 
           assert.isTrue(responded);
           done();
@@ -300,7 +300,7 @@
             "etag": "CPjC1qHc7MQCEAE="
           });
           folder.addEventListener("rise-storage-response", listener);
-          folder.handleStorageFolder(images);
+          folder._handleStorageFolder(images);
 
           assert.isTrue(responded);
           done();
@@ -318,14 +318,14 @@
 
           images.items.pop();
           folder.addEventListener("rise-storage-response", listener);
-          folder.handleStorageFolder(images);
+          folder._handleStorageFolder(images);
 
           assert.isTrue(responded);
           images.items[2].etag = "CMiEudSn2MMCEAs=";
           done();
         });
 
-        folder.items = [];
+        folder._items = [];
 
         suite("Rise Cache", function() {
           test("should return the correct URLs for files in a folder", function(done) {
@@ -338,9 +338,9 @@
               cacheFolder.removeEventListener("rise-storage-response", listener);
             };
 
-            cacheFolder.isCacheRunning = true;
+            cacheFolder._isCacheRunning = true;
             cacheFolder.addEventListener("rise-storage-response", listener);
-            cacheFolder.handleStorageFolder(images);
+            cacheFolder._handleStorageFolder(images);
 
             assert.isTrue(responded);
             done();
@@ -357,7 +357,7 @@
             };
 
             cacheFolder.addEventListener("rise-storage-response", listener);
-            cacheFolder.handleStorageFolder(images);
+            cacheFolder._handleStorageFolder(images);
 
             assert.isTrue(responded);
             done();
@@ -373,7 +373,7 @@
 
             images.items[2].etag = "new";
             cacheFolder.addEventListener("rise-storage-response", listener);
-            cacheFolder.handleStorageFolder(images);
+            cacheFolder._handleStorageFolder(images);
 
             assert.isTrue(responded);
             done();
@@ -395,7 +395,7 @@
               "etag": "CPjC1qHc7MQCEAE="
             });
             cacheFolder.addEventListener("rise-storage-response", listener);
-            cacheFolder.handleStorageFolder(images);
+            cacheFolder._handleStorageFolder(images);
 
             assert.isTrue(responded);
             done();
@@ -413,49 +413,49 @@
 
             images.items.pop();
             cacheFolder.addEventListener("rise-storage-response", listener);
-            cacheFolder.handleStorageFolder(images);
+            cacheFolder._handleStorageFolder(images);
 
             assert.isTrue(responded);
             images.items[2].etag = "CMiEudSn2MMCEAs=";
             done();
           });
 
-          cacheFolder.items = [];
+          cacheFolder._items = [];
         });
       });
 
-      suite("getFileFromCache", function() {
-        bucket.fileUrl = "http://url.to.my.file";
+      suite("_getFileFromCache", function() {
+        bucket._fileUrl = "http://url.to.my.file";
 
         test("should correctly set the cache URL when loading", function() {
-          bucket.isLoading = true;
-          bucket.getFileFromCache();
-          assert.equal(bucket.cacheUrl, "http://localhost:9494/?url=http://url.to.my.file");
+          bucket._isLoading = true;
+          bucket._getFileFromCache();
+          assert.equal(bucket._cacheUrl, "http://localhost:9494/?url=http://url.to.my.file");
         });
 
         test("should correctly set the cache URL when not loading", function() {
-          bucket.isLoading = false;
-          bucket.getFileFromCache();
-          assert.equal(bucket.cacheUrl, "http://localhost:9494/cb=0?url=http://url.to.my.file");
+          bucket._isLoading = false;
+          bucket._getFileFromCache();
+          assert.equal(bucket._cacheUrl, "http://localhost:9494/cb=0?url=http://url.to.my.file");
         });
       });
 
-      suite("getFilesFromCache", function() {
+      suite("_getFilesFromCache", function() {
         test("should correctly set number of total files in a folder", function() {
-          folder.getFilesFromCache(images);
-          assert.equal(folder.totalFiles, 3);
+          folder._getFilesFromCache(images);
+          assert.equal(folder._totalFiles, 3);
         });
       });
 
-      suite("handleCacheFile", function() {
+      suite("_handleCacheFile", function() {
         // Covered in e2e tests.
       });
 
-      suite("handleCacheFolder", function() {
+      suite("_handleCacheFolder", function() {
         // Covered in e2e tests.
       });
 
-      suite("handleCacheError", function() {
+      suite("_handleCacheError", function() {
         test("should fire rise-storage-error if there is a problem with the Rise Cache request", function(done) {
           var resp = {
             "xhr": {
@@ -469,28 +469,28 @@
           };
 
           fileBucket.addEventListener("rise-storage-error", listener);
-          fileBucket.handleCacheError({}, resp);
+          fileBucket._handleCacheError({}, resp);
           assert.isTrue(responded);
           done();
         });
       });
 
-      suite("handlePingResponse", function() {
-        test("should correctly set isCacheRunning and pingReceived if ping response is an empty string", function() {
-          fileBucket.handlePingResponse({}, { "response": "" });
-          assert.equal(fileBucket.isCacheRunning, false);
-          assert.equal(fileBucket.pingReceived, true);
+      suite("_handlePingResponse", function() {
+        test("should correctly set _isCacheRunning and _pingReceived if ping response is an empty string", function() {
+          fileBucket._handlePingResponse({}, { "response": "" });
+          assert.equal(fileBucket._isCacheRunning, false);
+          assert.equal(fileBucket._pingReceived, true);
         });
 
-        test("should correctly set isCacheRunning and pingReceived if ping response is not an empty string", function() {
-          fileBucket.handlePingResponse({}, { "response": "handlePingResponse();" });
-          assert.equal(fileBucket.isCacheRunning, true);
-          assert.equal(fileBucket.pingReceived, true);
+        test("should correctly set _isCacheRunning and _pingReceived if ping response is not an empty string", function() {
+          fileBucket._handlePingResponse({}, { "response": "_handlePingResponse();" });
+          assert.equal(fileBucket._isCacheRunning, true);
+          assert.equal(fileBucket._pingReceived, true);
         });
       });
 
-      suite("handlePingError", function() {
-        test("should correctly set isCacheRunning and pingReceived if a ping error occurs", function() {
+      suite("_handlePingError", function() {
+        test("should correctly set _isCacheRunning and _pingReceived if a ping error occurs", function() {
           var resp = {
             "xhr": {
               "status": 404,
@@ -498,146 +498,140 @@
             }
           };
 
-          fileBucket.handlePingError({}, resp);
-          assert.equal(fileBucket.isCacheRunning, false);
-          assert.equal(fileBucket.pingReceived, true);
+          fileBucket._handlePingError({}, resp);
+          assert.equal(fileBucket._isCacheRunning, false);
+          assert.equal(fileBucket._pingReceived, true);
         });
       });
 
-      suite("startTimer", function() {
+      suite("_startTimer", function() {
         var timerSpy;
-
-        test("should start a timer", function() {
-          folder.refresh = 10;
-          folder.startTimer();
-          assert.isDefined(folder["___refresh"]);
-        });
 
         test("should correctly set refresh interval", function() {
           folder.refresh = 10;
-          folder.startTimer();
+          folder._startTimer();
           assert.equal(folder.refresh, 10);
         });
 
         test("should enforce a minimum refresh interval", function() {
           folder.refresh = 1;
-          folder.startTimer();
+          folder._startTimer();
           assert.equal(folder.refresh, 5);
         });
 
         test("should check for changes to a cached file", function() {
-          timerSpy = sinon.spy(fileBucket, "getFileFromCache");
+          timerSpy = sinon.spy(fileBucket, "_getFileFromCache");
 
           fileBucket.refresh = 5;
-          fileBucket.isFile = true;
-          fileBucket.isCacheRunning = true;
-          fileBucket.startTimer();
+          fileBucket._isFile = true;
+          fileBucket._isCacheRunning = true;
+          fileBucket._startTimer();
 
           clock.tick(300000);
           assert(timerSpy.calledOnce);
         });
 
         test("should check for changes to an uncached file", function() {
-          timerSpy = sinon.spy(fileBucket.$.storage, "go");
+          timerSpy = sinon.spy(fileBucket.$.storage, "generateRequest");
 
-          fileBucket.isCacheRunning = false;
-          fileBucket.startTimer();
+          fileBucket._isCacheRunning = false;
+          fileBucket._startTimer();
 
           clock.tick(300000);
           assert(timerSpy.calledOnce);
         });
 
         test("should check for changes to a folder", function() {
-          timerSpy = sinon.spy(folder.$.storage, "go");
+          timerSpy = sinon.spy(folder.$.storage, "generateRequest");
 
-          folder.isFile = false;
-          folder.startTimer();
+          folder._isFile = false;
+          folder._startTimer();
 
           clock.tick(300000);
           assert(timerSpy.calledOnce);
         });
       });
 
-      suite("setIsFile", function() {
+      suite("_setIsFile", function() {
         var isFile;
 
-        test("should correctly set isFile for a file in the root of the bucket", function() {
-          fileBucket.setIsFile(bucketImage);
-          assert.equal(fileBucket.isFile, true);
+        test("should correctly set _isFile for a file in the root of the bucket", function() {
+          fileBucket._setIsFile(bucketImage);
+          assert.equal(fileBucket._isFile, true);
         });
 
-        test("should correctly set isFile for a file in a folder", function() {
-          fileFolder.setIsFile(folderImage);
-          assert.equal(fileFolder.isFile, true);
+        test("should correctly set _isFile for a file in a folder", function() {
+          fileFolder._setIsFile(folderImage);
+          assert.equal(fileFolder._isFile, true);
         });
 
-        test("should correctly set isFile for a folder", function() {
-          isFile = folder.setIsFile(images);
-          assert.equal(folder.isFile, false);
+        test("should correctly set _isFile for a folder", function() {
+          isFile = folder._setIsFile(images);
+          assert.equal(folder._isFile, false);
         });
       });
 
-      suite("setFileUrl", function() {
+      suite("_setFileUrl", function() {
         test("should correctly set fileUrl for a file in the root of the bucket when Rise Cache is running", function() {
-          fileBucket.isCacheRunning = true;
-          fileBucket.setFileUrl(bucketImage);
-          assert.equal(fileBucket.fileUrl, "https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fhome.jpg");
+          fileBucket._isCacheRunning = true;
+          fileBucket._setFileUrl(bucketImage);
+          assert.equal(fileBucket._fileUrl, "https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fhome.jpg");
         });
 
-        test("should correctly set fileUrl for a file in a folder when Rise Cache is running", function() {
-          fileFolder.isCacheRunning = true;
-          fileFolder.setFileUrl(folderImage);
-          assert.equal(fileFolder.fileUrl, "https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg");
+        test("should correctly set _fileUrl for a file in a folder when Rise Cache is running", function() {
+          fileFolder._isCacheRunning = true;
+          fileFolder._setFileUrl(folderImage);
+          assert.equal(fileFolder._fileUrl, "https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg");
         });
 
         test("should correctly set fileUrl for a file in the root of the bucket when Rise Cache is not running", function() {
-          fileBucket.isCacheRunning = false;
-          fileBucket.setFileUrl(bucketImage);
-          assert.equal(fileBucket.fileUrl, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg" + suffix);
+          fileBucket._isCacheRunning = false;
+          fileBucket._setFileUrl(bucketImage);
+          assert.equal(fileBucket._fileUrl, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg" + suffix);
         });
 
         test("should correctly set fileUrl for a file in a folder when Rise Cache is not running", function() {
-          fileFolder.isCacheRunning = false;
-          fileFolder.setFileUrl(folderImage);
-          assert.equal(fileFolder.fileUrl, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg" + suffix);
+          fileFolder._isCacheRunning = false;
+          fileFolder._setFileUrl(folderImage);
+          assert.equal(fileFolder._fileUrl, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg" + suffix);
         });
       });
 
-      suite("filterFiles", function() {
+      suite("_filterFiles", function() {
         test("should return true if no fileType or contentType attribute is provided", function() {
-          assert.equal(fileBucket.filterFiles("image/jpeg"), true);
+          assert.equal(fileBucket._filterFiles("image/jpeg"), true);
         });
       });
 
-      suite("filterByContentType", function() {
+      suite("_filterByContentType", function() {
         test("should return true if a content type matches one of the contentType attribute values", function() {
-          assert.equal(contentType.filterByContentType("image/jpeg"), true);
+          assert.equal(contentType._filterByContentType("image/jpeg"), true);
         });
 
         test("should return false if a content type does not match one of the contentType attribute values", function() {
-          assert.equal(contentType.filterByContentType("video/webm"), false);
+          assert.equal(contentType._filterByContentType("video/webm"), false);
         });
       });
 
-      suite("filterByFileType", function() {
+      suite("_filterByFileType", function() {
         test("should return true when filtering by image and the content type is a jpeg", function() {
-          assert.equal(imageFileType.filterByFileType("image/jpeg"), true);
+          assert.equal(imageFileType._filterByFileType("image/jpeg"), true);
         });
 
         test("should return false when filtering by image and the content type is a webm", function() {
-          assert.equal(imageFileType.filterByFileType("video/webm"), false);
+          assert.equal(imageFileType._filterByFileType("video/webm"), false);
         });
 
         test("should return true when filtering by video and the content type is a webm", function() {
-          assert.equal(videoFileType.filterByFileType("video/webm"), true);
+          assert.equal(videoFileType._filterByFileType("video/webm"), true);
         });
 
         test("should return false when filtering by video and the content type is a jpeg", function() {
-          assert.equal(videoFileType.filterByFileType("image/jpeg"), false);
+          assert.equal(videoFileType._filterByFileType("image/jpeg"), false);
         });
       });
 
-      suite("sortFiles", function() {
+      suite("_sortFiles", function() {
         var filesByName =
           [{
             "sortBy": "images/home.jpg",
@@ -668,8 +662,8 @@
 
         test("should sort by name in ascending order", function() {
           folder.sort = "name";
-          folder.sortDirection = "asc";
-          sortedFiles = JSON.stringify(folder.sortFiles(filesByName));
+          folder.sortdirection = "asc";
+          sortedFiles = JSON.stringify(folder._sortFiles(filesByName));
 
           assert.equal(sortedFiles, JSON.stringify([
             {
@@ -689,8 +683,8 @@
 
         test("should sort by name in descending order", function() {
           folder.sort = "name";
-          folder.sortDirection = "desc";
-          sortedFiles = JSON.stringify(folder.sortFiles(filesByName));
+          folder.sortdirection = "desc";
+          sortedFiles = JSON.stringify(folder._sortFiles(filesByName));
 
           assert.equal(sortedFiles, JSON.stringify([
             {
@@ -710,8 +704,8 @@
 
         test("should sort by date in ascending order", function() {
           folder.sort = "date";
-          folder.sortDirection = "asc";
-          sortedFiles = JSON.stringify(folder.sortFiles(filesByDate));
+          folder.sortdirection = "asc";
+          sortedFiles = JSON.stringify(folder._sortFiles(filesByDate));
 
           assert.equal(sortedFiles, JSON.stringify([
             {
@@ -731,8 +725,8 @@
 
         test("should sort by date in descending order", function() {
           folder.sort = "date";
-          folder.sortDirection = "desc";
-          sortedFiles = JSON.stringify(folder.sortFiles(filesByDate));
+          folder.sortdirection = "desc";
+          sortedFiles = JSON.stringify(folder._sortFiles(filesByDate));
 
           assert.equal(sortedFiles, JSON.stringify([
             {
@@ -752,7 +746,7 @@
 
         test("should sort in random order", function() {
           folder.sort = "random";
-          sortedFiles = folder.sortFiles(filesByName);
+          sortedFiles = folder._sortFiles(filesByName);
 
           // Not possible to predict what order files will be returned in, only that they are returned.
           assert.equal(sortedFiles.length, 3);
@@ -760,8 +754,8 @@
 
         test("should sort in ascending order when no sortDirection is provided", function() {
           folder.sort = "name";
-          folder.sortDirection = null;
-          sortedFiles = JSON.stringify(folder.sortFiles(filesByName));
+          folder.sortdirection = null;
+          sortedFiles = JSON.stringify(folder._sortFiles(filesByName));
 
           assert.equal(sortedFiles, JSON.stringify([
             {
@@ -780,7 +774,7 @@
         });
       });
 
-      suite("prepareResponse", function() {
+      suite("_prepareResponse", function() {
         var response,
           files =
           [{
@@ -797,14 +791,14 @@
           }];
 
         test("should return an empty object when an empty array is passed in", function() {
-          response = JSON.stringify(folder.prepareResponse([]));
+          response = JSON.stringify(folder._prepareResponse([]));
 
           assert.equal(response, JSON.stringify( { "files": [] } ));
         });
 
         test("should return an object containing a sorted list of files", function() {
           folder.sort = "name";
-          response = JSON.stringify(folder.prepareResponse(files));
+          response = JSON.stringify(folder._prepareResponse(files));
           result = {
             "files": [
               {
