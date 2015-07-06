@@ -86,28 +86,28 @@
 
         test("should correctly set Storage request URL for a folder", function() {
           folder._computeStorageUrl();
-          assert.equal(folder.$.storage.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=images/");
+          assert.equal(folder.$.storage.url, "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=abc123&folder=images/");
         });
 
         test("should correctly set Storage request URL for a file in a folder", function() {
           fileFolder._computeStorageUrl();
-          assert.equal(fileFolder.$.storage.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=images/home.jpg");
+          assert.equal(fileFolder.$.storage.url, "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=abc123&file=images/home.jpg");
         });
 
         test("should correctly set Storage request URL for a bucket", function() {
           bucket._computeStorageUrl();
-          assert.equal(bucket.$.storage.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F");
+          assert.equal(bucket.$.storage.url, "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=abc123");
         });
 
         test("should correctly set Storage request URL for a file in a bucket", function() {
           fileBucket._computeStorageUrl();
-          assert.equal(fileBucket.$.storage.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg");
+          assert.equal(fileBucket.$.storage.url, "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=abc123&file=home.jpg");
         });
 
         test("should correctly set Storage request URL for a folder that ends with a /", function() {
           folder.setAttribute("folder", "images/");
           folder._computeStorageUrl();
-          assert.equal(folder.$.storage.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o?delimiter=%2F&prefix=images%2F");
+          assert.equal(folder.$.storage.url, "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=abc123&folder=images%2F");
         });
       });
 

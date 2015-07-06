@@ -239,7 +239,11 @@
      * An instance of the element was inserted into the DOM.
      */
     attached: function() {
-      this.$.ping.generateRequest();
+      var self = this;
+
+      setTimeout(function() {
+        self.$.ping.generateRequest();
+      }, 1000);
     },
 
     /***************************************** STORAGE ******************************************/
@@ -248,9 +252,9 @@
      * Sets the URL that is used for making requests to Storage.
      */
     _computeStorageUrl: function() {
-      var baseUrl = "https://www.googleapis.com/storage/v1/b/risemedialibrary-" + encodeURIComponent(this.companyid) + "/o",
-        delimiter = "?delimiter=" + encodeURIComponent("/"),
-        folder = "&prefix=" + encodeURIComponent(this.folder),
+      //var baseUrl = "https://storage-dot-rvacore-test.appspot.com/_ah/api/storage/v0.01/files?companyId=" + encodeURIComponent(this.companyid),
+      var baseUrl = "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=" + encodeURIComponent(this.companyid),
+        folder = encodeURIComponent(this.folder),
         filename = encodeURIComponent(this.filename),
         url = baseUrl;
 
@@ -263,20 +267,16 @@
 
           // Get a specific file in a specific folder.
           if (this.filename) {
-            url += delimiter + folder + filename;
+            url += "&file=" + folder + filename;
           }
           // Get all files in a specific folder.
           else {
-            url += delimiter + folder;
+            url += "&folder=" + folder;
           }
         }
         // Get a specific file in a bucket.
         else if (this.filename) {
-          url += "/" + filename;
-        }
-        // Get all files in a bucket.
-        else {
-          url += delimiter;
+          url += "&file=" + filename;
         }
 
         this.$.storage.url = url;
@@ -288,6 +288,11 @@
      */
     _handleStorageResponse: function(e, resp) {
       if (resp && resp.response) {
+        if(resp.response.files) {
+          resp.response.items = resp.response.files;
+          delete resp.response.files;
+        }
+
         if (this._isLoading) {
           this._setIsFile(resp.response);
         }
