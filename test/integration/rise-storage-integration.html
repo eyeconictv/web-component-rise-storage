@@ -18,6 +18,7 @@
   <rise-storage id="content-type" companyId="abc123" folder="my-folder" contentType="image/jpeg image/bmp"></rise-storage>
   <rise-storage id="cache-file" companyId="abc123" fileName="home.jpg"></rise-storage>
   <rise-storage id="cache-file-folder" companyId="abc123" folder="images" fileName="home.jpg"></rise-storage>
+  <rise-storage id="offline-player" companyId="abc123" folder="images"></rise-storage>
 
   <script src="../js/rise-storage-data.js"></script>
   <script>
@@ -32,6 +33,7 @@
         contentType = document.querySelector("#content-type"),
         cacheFile = document.querySelector("#cache-file"),
         cacheFileFolder = document.querySelector("#cache-file-folder"),
+        offlinePlayer = document.querySelector("#offline-player"),
         cacheHeader = { "Last-Modified": "Fri, 01 May 2015 15:32:11 GMT" },
         newCacheHeader = { "Last-Modified": "Fri, 24 Apr 2015 15:32:11 GMT" };
 
@@ -460,6 +462,128 @@
           server.respondWith([200, newCacheHeader, ""]);
           cacheFileFolder._getFileFromCache();
           server.respond();
+        });
+      });
+
+      suite("offline-player integration", function() {
+        var sandbox;
+
+        setup(function() {
+          offlinePlayer._reset();
+          offlinePlayer.offlinePlayer = window;
+          offlinePlayer.offlinePlayerOrigin = "*";
+          offlinePlayer.pingReceived = true;
+          offlinePlayer.isCacheRunning = false;
+
+          clock.restore();
+          sandbox = sinon.sandbox.create();
+        });
+
+        teardown(function() {
+          clock = sinon.useFakeTimers();
+          sandbox.restore();
+        });
+
+        test("should be running inside offline-player", function(done) {
+          offlinePlayer.offlinePlayer = null;
+          offlinePlayer.offlinePlayerOrigin = null;
+          offlinePlayer.pingReceived = false;
+          offlinePlayer.isCacheRunning = false;
+
+          window.postMessage("register.chrome.app.window", "*");
+
+          setTimeout(function() {
+            assert.isTrue(offlinePlayer._isOfflinePlayer());
+            done();
+          }, 0);
+        });
+
+        test("should reload data when target matches offline-player event targets", function(done) {
+          sandbox.spy(offlinePlayer, "_loadStorage");
+
+          window.postMessage({ type: "storage-target-changed", targets: ["risemedialibrary-abc123/images/"] }, "*");
+
+          setTimeout(function() {
+            assert.isTrue(offlinePlayer._loadStorage.called);
+            done();
+          }, 0);
+        });
+
+        test("should not reload data when targets do not match offline-player event targets", function(done) {
+          sandbox.spy(offlinePlayer, "_loadStorage");
+
+          window.postMessage({ type: "storage-target-changed", targets: ["risemedialibrary-abc123/videos/"] }, "*");
+
+          setTimeout(function() {
+            assert.isTrue(offlinePlayer._loadStorage.notCalled);
+            done();
+          }, 0);
+        });
+
+        test("should ignore data load events not directed to this instance", function(done) {
+          sandbox.spy(offlinePlayer, "_handleStorageResponse");
+
+          window.postMessage({ type: "storage-component-loaded", clientId: -1 }, "*");
+
+          setTimeout(function() {
+            assert.isTrue(offlinePlayer._handleStorageResponse.notCalled);
+            done();
+          }, 0);
+        });
+
+        test("should process data load events directed to this instance", function(done) {
+          sandbox.spy(offlinePlayer, "_handleStorageResponse");
+
+          window.postMessage({ type: "storage-component-loaded", clientId: offlinePlayer.offlinePlayerClientId }, "*");
+
+          setTimeout(function() {
+            assert.isTrue(offlinePlayer._handleStorageResponse.called);
+            done();
+          }, 0);
+        });
+
+        test("should ignore response updated events not directed to this instance", function(done) {
+          sandbox.spy(offlinePlayer, "_processStorageResponse");
+
+          window.postMessage({ type: "storage-component-response-updated", clientId: -1 }, "*");
+
+          setTimeout(function() {
+            assert.isTrue(offlinePlayer._processStorageResponse.notCalled);
+            done();
+          }, 0);
+        });
+
+        test("should process response updated events directed to this instance", function(done) {
+          sandbox.spy(offlinePlayer, "_processStorageResponse");
+
+          window.postMessage({ type: "storage-component-response-updated", clientId: offlinePlayer.offlinePlayerClientId }, "*");
+
+          setTimeout(function() {
+            assert.isTrue(offlinePlayer._processStorageResponse.called);
+            done();
+          }, 0);
+        });
+
+        test("should send a rise-storage-response event after receiving a response updated notification", function(done) {
+          var storageResponse = {
+            files: [{
+              name: "images/image.jpg",
+              selfLink: "https://storage.googleapis.com/risemedialibrary-abc123/images%2Fimage.jpg",
+              etag: "test-etag"
+            }]
+          };
+
+          responseHandler = function(response) {
+            assert.equal(response.detail.url, "https://storage.googleapis.com/risemedialibrary-abc123/images%2Fimage.jpg?alt=media");
+            assert.isTrue(response.detail.url.startsWith("https://storage.googleapis.com/risemedialibrary-abc123/images%2Fimage.jpg?alt=media"));
+            done();
+          };
+
+          offlinePlayer.addEventListener("rise-storage-response", responseHandler);
+          window.postMessage({ type: "storage-component-response-updated",
+                               clientId: offlinePlayer.offlinePlayerClientId,
+                               response: storageResponse
+                             }, "*");
         });
       });
     });
