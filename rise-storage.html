@@ -207,15 +207,6 @@
     _totalFilesBefore: 0,
 
     /**
-     * Stores details about a particular file in a folder.
-     *
-     * @property _files
-     * @type object
-     * @default []
-     */
-    _files: [],
-
-    /**
      * Whether or not any of the files in a folder have changed.
      *
      * @property _isChanged
@@ -239,11 +230,7 @@
      * An instance of the element was inserted into the DOM.
      */
     attached: function() {
-      var self = this;
-
-      setTimeout(function() {
-        self.$.ping.generateRequest();
-      }, 1000);
+      this.$.ping.generateRequest();
     },
 
     /***************************************** STORAGE ******************************************/
@@ -339,7 +326,6 @@
      */
     _handleStorageFile: function(resp) {
       var file = {},
-        files = [],
         etag = null;
 
       // File in the root of the bucket.
@@ -355,8 +341,11 @@
 
       if (this._isLoading) {
         this._items.push({
+          "name": this.filename,
           "etag": etag
         });
+
+        file.added = true;
 
         this._isLoading = false;
       }
@@ -370,11 +359,11 @@
         else {
           this._items[0].etag = etag;
           file.url += "&cb=" + new Date().getTime();
+          file.changed = true;
         }
       }
 
-      files.push(file);
-      this.fire("rise-storage-response", this._prepareResponse(files));
+      this.fire("rise-storage-response", file);
       this._startTimer();
     },
 
@@ -384,12 +373,32 @@
     _handleStorageFolder: function(resp) {
       var self = this,
         file = {},
-        files = [],
         previousItem = null,
         suffix = "?alt=media",
         cb = "&cb=" + new Date().getTime();
 
       if (resp.items) {
+        if (this.sort) {
+          resp.items.forEach(function(item) {
+            // Sorting
+            if (self.sort) {
+              if (self.sort === "name") {
+                item.sortBy = item.name;
+              }
+              else if (self.sort === "date") {
+                item.sortBy = new Date(item.updated).getTime();
+              }
+            }
+          });
+
+          resp.items = this._sortFiles(resp.items);
+          resp.items.forEach(function(item) {
+            if (self.sort) {
+              delete item.sortBy;
+            }
+          });
+        }
+
         resp.items.forEach(function(item) {
           file = {};
 
@@ -398,16 +407,6 @@
             if (item.selfLink !== undefined) {
               if (!self._filterFiles(item.contentType)) {
                 return;
-              }
-
-              // Sorting
-              if (self.sort) {
-                if (self.sort === "name") {
-                  file.sortBy = item.name;
-                }
-                else if (self.sort === "date") {
-                  file.sortBy = new Date(item.updated).getTime();
-                }
               }
 
               if (self._isLoading) {
@@ -424,6 +423,8 @@
                   "etag": item.etag,
                   "url": file.url
                 });
+
+                file.added = true;
               }
               else {
                 // Construct URL.
@@ -445,6 +446,8 @@
                     "etag": item.etag,
                     "url": file.url
                   });
+
+                  file.added = true;
                 }
                 // Existing file
                 else {
@@ -456,24 +459,32 @@
                     if (!self._isCacheRunning) {
                       file.url = previousItem.url;
                     }
+
+                    file.unchanged = true;
                   }
                   // File has changed.
                   else {
                     previousItem.etag = item.etag;
                     previousItem.url = file.url;
+
+                    file.changed = true;
                   }
                 }
               }
 
-              files.push(file);
+              if (self.sort) {
+                delete file.sortBy;
+              }
+
+              if(!file.unchanged) {
+                self.fire("rise-storage-response", file);
+              }
             }
           }
         });
 
+        this._processRemovedFiles(resp.items);
         this._isLoading = false;
-        // Clean up files from this._items that are no longer in the folder.
-        // Remove all this._items that are not in response.items. Use name field as the id.
-        this.fire("rise-storage-response", this._prepareResponse(files));
         this._startTimer();
       }
     },
@@ -504,12 +515,14 @@
 
       if (resp.items) {
         this._numFiles = 0;
-        this._files = [];
         this._isChanged = false;
         this._totalFilesBefore = this._totalFiles;
 
         // One item is the folder itself.
         this._totalFiles = resp.items.length - 1;
+
+        // Remove no longer existing files
+        this._processRemovedFiles(resp.items);
 
         resp.items.forEach(function(item) {
           // Check that current item is not a folder.
@@ -544,7 +557,6 @@
      */
     _handleCacheFile: function(resp) {
       var file = {},
-        files = [],
         lastModified = "";
 
       if (resp && resp.xhr) {
@@ -554,8 +566,11 @@
         if (this._isLoading) {
           // Save Last Modified so it can be compared in subsequent requests.
           this._items.push({
+            "name": this.filename,
             "lastModified": lastModified
           });
+
+          file.added = true;
 
           if (lastModified === null) {
             console.log("File does not have a Last-Modified header: " + file.url);
@@ -566,17 +581,19 @@
         else {
           // Rise Cache file hasn't changed.
           if (this._items[0].lastModified === lastModified) {
+            file.unchanged = true;
             this._startTimer();
 
             return;
           }
           else {
             this._items[0].lastModified = lastModified;
+            this.changed = true;
+            file.changed = true;
           }
         }
 
-        files.push(file);
-        this.fire("rise-storage-response", this._prepareResponse(files));
+        this.fire("rise-storage-response", file);
       }
 
       this._startTimer();
@@ -609,10 +626,13 @@
         if (this._isLoading) {
           // Save file details so they can be compared in subsequent requests.
           this._items.push({
+            "name": this._getFileNameFromUrl(url),
             "lastModified": lastModified,
             "fullUrl": file.url,
             "url": url
           });
+
+          file.added = true;
 
           if (lastModified === null) {
             console.log("File does not have a Last-Modified header: " + file.url);
@@ -626,27 +646,34 @@
           // New file
           if (previousItem === undefined) {
             this._items.push({
+              "name": this._getFileNameFromUrl(url),
               "lastModified": lastModified,
               "fullUrl": file.url,
               "url": url
             });
+
+            file.added = true;
           }
           // Existing file
           else {
             if (lastModified === previousItem.lastModified) {
               // Use the same URL as before in order to leverage browser caching.
               file.url = previousItem.fullUrl;
+              file.unchanged = true;
             }
             // File has changed.
             else {
               previousItem.lastModified = lastModified;
               previousItem.fullUrl = file.url;
               this._isChanged = true;
+              file.changed = true;
             }
           }
         }
 
-        this._files.push(file);
+        if(!file.unchanged) {
+          this.fire("rise-storage-response", file);
+        }
       }
 
       this._numFiles++;
@@ -656,10 +683,6 @@
         // or removed.
         if (this._totalFiles !== this._totalFilesBefore) {
           this._isChanged = true;
-        }
-
-        if (this._isLoading || this._isChanged) {
-          this.fire("rise-storage-response", this._prepareResponse(this._files));
         }
 
         this._startTimer();
@@ -697,6 +720,27 @@
       this._isCacheRunning = false;
       this._pingReceived = true;
       this.go();
+    },
+
+    /**
+     * Removes no longer existing files from the local list and notifies clients about the deletion
+     */
+    _processRemovedFiles: function(latestFilesList) {
+      function fileExists(file) {
+        return latestFilesList.some(function(element) {
+          return file.name === element.name;
+        });
+      }
+
+      for(var i = this._items.length - 1; i >= 0; i--) {
+        var file = this._items[i];
+
+        if(!fileExists(file)) {
+          this._items.splice(i, 1);
+          file.deleted = true;
+          this.fire("rise-storage-response", file);
+        }
+      }
     },
 
     /****************************************** COMMON ******************************************/
@@ -868,27 +912,46 @@
     },
 
     /**
-     * Prepares the response object.
+     * Returns the path of a file in a given bucket, excluding bucket name and parameters
      */
-    _prepareResponse: function(files) {
-      var self = this,
-        response = {};
-
-      response.files = [];
-
-      if (this.sort && files.length > 0) {
-        files = this._sortFiles(files);
+    _getFileNameFromUrl: function(fileUrl) {
+      if(!fileUrl) {
+        return null;
       }
+      else {
+        var url = decodeURIComponent(fileUrl);
+        var start = url.indexOf("/", "https://storage.googleapis.com/".length);
+        var end = url.lastIndexOf("?");
 
-      files.forEach(function(file) {
-        if (self.sort) {
-          delete file.sortBy;
+        if(start === -1) {
+          return url;
         }
+        else if(end > 0 && end > start) {
+          return url.substring(start + 1, end);
+        }
+        else {
+          return url.substring(start + 1);
+        }
+      }
+    },
 
-        response.files.push(file);
-      });
-
-      return response;
+    /**
+     * Initializes internal properties to their default state
+     */
+    _reset: function() {
+      this._isLoading = true;
+      this._isFile = true;
+      this._cacheUrl = "";
+      this._fileUrl = "";
+      this._items = [];
+      this._isCacheRunning = false;
+      this._pingReceived = false;
+      this._numFiles = 0;
+      this._totalFiles = 0;
+      this._totalFilesBefore = 0;
+      this._isChanged = false;
     }
+
+
   });
 </script>
