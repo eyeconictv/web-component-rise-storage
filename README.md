@@ -67,8 +67,8 @@ Next, construct your HTML page. You should include `webcomponents.js` before any
 
         // Respond to events it fires.
         storage.addEventListener('rise-storage-response', function(e) {
-          if (e.detail && e.detail.files && e.detail.files.length > 0) {
-            console.log(e.detail.files[0].url); // URL to the file.
+          if (e.detail) {
+            console.log(e.detail.url); // URL to the file.
           }
         });
 
@@ -83,25 +83,13 @@ You can get the `companyId` by copying the value of the `cid` parameter in the U
 
 ![company-id](https://cloud.githubusercontent.com/assets/1190420/7048788/0835e2e2-dde3-11e4-9b25-8e4365541351.png)
 
-The web component returns a JSON response with the following format:
+The web component returns a JSON response for each file matching the provided criteria with the following format (one message per file):
 ```
 {
-  "files": [
-    "url": "http://url.to.file",
-    "timeline": {
-      carryon: "false",
-      duration: 60,
-      endDate: "01/31/15 12:00 AM",
-      endTime: null,
-      pud: "false",
-      recurrenceOptions: null,
-      startDate: "01/30/15 12:00 AM",
-      startTime: null,
-      timeDefined: true,
-      trash: "false",
-      type: "TIMELINE"
-    }
-  ]
+  "url": "http://url.to.file",
+  "added": "boolean indicating if the file has just been added",
+  "changed": "boolean indicating if the file has changed since the previous message",
+  "deleted": "boolean indicating if the file has been deleted since the previous message",
 }
 ```
 
