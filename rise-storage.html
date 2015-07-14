@@ -92,6 +92,15 @@
       refresh: {
         type: Number,
         value: 0
+      },
+      /**
+       * The environment from which information should be retrieved.
+       *
+       * Possible values are "prod" or "test". In case the attribute is not provided, it defaults to "prod".
+       */
+      env: {
+        type: String,
+        value: "prod"
       }
     },
 
@@ -273,8 +282,10 @@
      * Sets the URL that is used for making requests to Storage.
      */
     _computeStorageUrl: function() {
-      //var baseUrl = "https://storage-dot-rvacore-test.appspot.com/_ah/api/storage/v0.01/files?companyId=" + encodeURIComponent(this.companyid),
-      var baseUrl = "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=" + encodeURIComponent(this.companyid),
+      var productionUrl = "https://storage-dot-rvaserver2.appspot.com",
+        testingUrl = "https://storage-dot-rvacore-test.appspot.com",
+        serverUrl = (this.env !== "test" ? productionUrl : testingUrl),
+        baseUrl = serverUrl + "/_ah/api/storage/v0.01/files?companyId=" + encodeURIComponent(this.companyid),
         folder = encodeURIComponent(this.folder),
         filename = encodeURIComponent(this.filename),
         url = baseUrl;
