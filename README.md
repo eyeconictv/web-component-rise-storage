@@ -104,6 +104,7 @@ The web component returns a JSON response for each file matching the provided cr
 | `sort`                 | `<string>` One of `name`, `date` or `random`.                                   | `''`             |
 | `sortDirection`        | `<string>` Either `asc` or `desc`.                                              | `''` (or `asc` if `sort` is `name` or `date`)|
 | `refresh`              | `<number>` The number of minutes before Storage will be checked for changes. The minimum refresh time is 5 minutes. | `0` (no refresh) |
+| `env`                  | `<string>` Either `prod` or `test`.                                             | `prod`           |
 
 ### Properties
 | Property         | Type                                              | Default |

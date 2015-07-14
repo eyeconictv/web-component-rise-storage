@@ -14,6 +14,7 @@
   <rise-storage id="noCompany"></rise-storage>
   <rise-storage id="bucket" companyId="abc123"></rise-storage>
   <rise-storage id="folder" companyId="abc123" folder="images"></rise-storage>
+  <rise-storage id="folder-testing" companyId="abc123" folder="images" env="test"></rise-storage>
   <rise-storage id="file-folder" companyId="abc123" folder="images" fileName="home.jpg"></rise-storage>
   <rise-storage id="file-bucket" companyId="abc123" fileName="home.jpg"></rise-storage>
   <rise-storage id="cache-folder" companyId="abc123" folder="images"></rise-storage>
@@ -31,6 +32,7 @@
         noCompany = document.querySelector("#noCompany"),
         bucket = document.querySelector("#bucket"),
         folder = document.querySelector("#folder"),
+        folderTesting = document.querySelector("#folder-testing"),
         fileFolder = document.querySelector("#file-folder"),
         cacheFolder = document.querySelector("#cache-folder"),
         cacheFile = document.querySelector("#cache-file"),
@@ -87,6 +89,11 @@
         test("should correctly set Storage request URL for a folder", function() {
           folder._computeStorageUrl();
           assert.equal(folder.$.storage.url, "https://storage-dot-rvaserver2.appspot.com/_ah/api/storage/v0.01/files?companyId=abc123&folder=images/");
+        });
+
+        test("should correctly set Storage request URL for a folder in the testing environment", function() {
+          folderTesting._computeStorageUrl();
+          assert.equal(folderTesting.$.storage.url, "https://storage-dot-rvacore-test.appspot.com/_ah/api/storage/v0.01/files?companyId=abc123&folder=images/");
         });
 
         test("should correctly set Storage request URL for a file in a folder", function() {
