@@ -66,6 +66,7 @@
 
         test("should return the correct URL for a specific file in a bucket", function(done) {
           responseHandler = function(response) {
+            assert.equal(response.detail.name, "home.jpg");
             assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg?alt=media");
             done();
           };
@@ -90,6 +91,7 @@
 
         test("should return a new URL if the file has changed", function(done) {
           responseHandler = function(response) {
+            assert.equal(response.detail.name, "home.jpg");
             assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg?alt=media&cb=0");
             done();
           };
@@ -121,6 +123,7 @@
 
         test("should return the correct URL for a specific file in a folder", function(done) {
           responseHandler = function(response) {
+            assert.equal(response.detail.name, "images/home.jpg");
             assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media");
             done();
           };
@@ -150,6 +153,8 @@
             files.push(response.detail);
 
             if(files.length === 2) {
+              assert.equal(files[0].name, "images/home.jpg");
+              assert.equal(files[1].name, "images/home.jpg");
               assert.equal(files[0].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media");
               assert.equal(files[1].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media&cb=0");
               assert.isTrue(files[0].added);
@@ -193,6 +198,9 @@
             files.push(response.detail);
 
             if(files.length === 3) {
+              assert.equal(files[0].name, "images/home.jpg");
+              assert.equal(files[1].name, "images/circle.png");
+              assert.equal(files[2].name, "images/my-image.bmp");
               assert.equal(files[0].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media");
               assert.equal(files[1].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media");
               assert.equal(files[2].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fmy-image.bmp?alt=media");
@@ -225,6 +233,7 @@
             files.push(response.detail);
 
             if(files.length === 4) {
+              assert.equal(files[3].name, "images/circle.png");
               assert.equal(files[3].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media&cb=0");
               assert.isTrue(files[3].changed);
               done();
@@ -250,6 +259,7 @@
             files.push(response.detail);
 
             if(files.length === 4) {
+              assert.equal(files[3].name, "images/golf.svg");
               assert.equal(files[3].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fgolf.svg?alt=media&cb=0");
               done();
             }
@@ -280,6 +290,10 @@
             files.push(response.detail);
 
             if(files.length === 4) {
+              assert.equal(files[0].name, "images/home.jpg");
+              assert.equal(files[1].name, "images/circle.png");
+              assert.equal(files[2].name, "images/my-image.bmp");
+              assert.equal(files[3].name, "images/my-image.bmp");
               assert.equal(files[0].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media");
               assert.equal(files[1].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media");
               assert.equal(files[2].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fmy-image.bmp?alt=media");
@@ -344,6 +358,8 @@
             files.push(response.detail);
 
             if(files.length === 2) {
+              assert.equal(files[0].name, "images/home.jpg");
+              assert.equal(files[1].name, "images/my-image.bmp");
               assert.equal(files[0].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media");
               assert.equal(files[1].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fmy-image.bmp?alt=media");
               done();
@@ -371,6 +387,7 @@
 
         test("should return the correct URL for a specific file in a bucket", function(done) {
           responseHandler = function(response) {
+            assert.equal(response.detail.name, "home.jpg");
             assert.equal(response.detail.url, "http://localhost:9494/?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fhome.jpg");
             done();
           };
@@ -395,6 +412,7 @@
 
         test("should return a new URL if the file has changed", function(done) {
           responseHandler = function(response) {
+            assert.equal(response.detail.name, "home.jpg");
             assert.equal(response.detail.url, "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fhome.jpg");
             done();
           };
@@ -425,6 +443,7 @@
 
         test("should return the correct URL for a specific file in a folder", function(done) {
           responseHandler = function(response) {
+            assert.equal(response.detail.name, "images/home.jpg");
             assert.equal(response.detail.url, "http://localhost:9494/?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg");
             done();
           };
@@ -449,6 +468,7 @@
 
         test("should return a new URL if the file has changed", function(done) {
           responseHandler = function(response) {
+            assert.equal(response.detail.name, "images/home.jpg");
             assert.equal(response.detail.url, "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg");
             done();
           };
@@ -574,12 +594,14 @@
           };
 
           responseHandler = function(response) {
+            assert.equal(response.detail.name, "images/image.jpg");
             assert.equal(response.detail.url, "https://storage.googleapis.com/risemedialibrary-abc123/images%2Fimage.jpg?alt=media");
             assert.isTrue(response.detail.url.startsWith("https://storage.googleapis.com/risemedialibrary-abc123/images%2Fimage.jpg?alt=media"));
             done();
           };
 
           offlinePlayer.addEventListener("rise-storage-response", responseHandler);
+          debugger;
           window.postMessage({ type: "storage-component-response-updated",
                                clientId: offlinePlayer.offlinePlayerClientId,
                                response: storageResponse
