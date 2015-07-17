@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>rise-storage</title>
+
+  <script src="../../../webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../../rise-storage.html">
+</head>
+<body>
+  <rise-storage id="cache-folder" companyId="abc123" folder="images"></rise-storage>
+  <rise-storage id="cache-file" companyId="abc123" fileName="home.jpg"></rise-storage>
+
+  <script src="../js/rise-storage-data.js"></script>
+  <script>
+    suite("rise-storage", function() {
+      var responded,
+        listener,
+        clock,
+        cacheFolder = document.querySelector("#cache-folder"),
+        cacheFile = document.querySelector("#cache-file"),
+        suffix = "?alt=media";
+
+      suiteSetup(function() {
+        xhr = sinon.useFakeXMLHttpRequest();
+
+        xhr.onCreate = function (xhr) {
+          requests.push(xhr);
+        };
+
+        clock = sinon.useFakeTimers();
+      });
+
+      suiteTeardown(function() {
+        xhr.restore();
+        clock.restore();
+      });
+
+      setup(function() {
+        requests = [];
+        responded = false;
+      });
+
+      suite("Rise Cache", function() {
+        var localImages;
+
+        setup(function() {
+          cacheFolder._reset();
+          cacheFolder._isCacheRunning = true;
+          localImages = JSON.parse(JSON.stringify(images));
+        });
+
+        teardown(function() {
+          images = localImages;
+        });
+
+        test("should return the correct URLs for files in a folder", function(done) {
+          var files = [];
+
+          var listener = function(response) {
+            files.push(response.detail);
+
+            if(files.length === 3) {
+              responded = true;
+              assert.equal(files[0].name, "images/home.jpg");
+              assert.equal(files[1].name, "images/circle.png");
+              assert.equal(files[2].name, "images/my-image.bmp");
+              assert.equal(files[0].url, "http://localhost:9494/?url=https%3A%2F%2Fwww.googleapis.com%2Fstorage%2Fv1%2Fb%2Frisemedialibrary-abc123%2Fo%2Fimages%252Fhome.jpg%3Falt%3Dmedia");
+              assert.equal(files[1].url, "http://localhost:9494/?url=https%3A%2F%2Fwww.googleapis.com%2Fstorage%2Fv1%2Fb%2Frisemedialibrary-abc123%2Fo%2Fimages%252Fcircle.png%3Falt%3Dmedia");
+              assert.equal(files[2].url, "http://localhost:9494/?url=https%3A%2F%2Fwww.googleapis.com%2Fstorage%2Fv1%2Fb%2Frisemedialibrary-abc123%2Fo%2Fimages%252Fmy-image.bmp%3Falt%3Dmedia");
+              cacheFolder.removeEventListener("rise-storage-response", listener);
+            }
+          };
+
+          cacheFolder.addEventListener("rise-storage-response", listener);
+          cacheFolder._handleStorageFolder(images);
+
+          assert.isTrue(responded);
+          done();
+        });
+
+        test("should return new URLs if none of the files have changed", function(done) {
+          var listener = sinon.spy();
+
+          cacheFolder._handleStorageFolder(images);
+
+          cacheFolder.addEventListener("rise-storage-response", listener);
+          cacheFolder._handleStorageFolder(images);
+
+          assert.isTrue(listener.notCalled);
+          done();
+        });
+
+        test("should return new URL if a file has changed", function(done) {
+          var listener = function(response) {
+            responded = true;
+            assert.equal(response.detail.name, "images/circle.png");
+            assert.equal(response.detail.url, "http://localhost:9494/cb=0?url=https%3A%2F%2Fwww.googleapis.com%2Fstorage%2Fv1%2Fb%2Frisemedialibrary-abc123%2Fo%2Fimages%252Fcircle.png%3Falt%3Dmedia");
+            assert.isTrue(response.detail.changed);
+            cacheFolder.removeEventListener("rise-storage-response", listener);
+          };
+
+          cacheFolder._handleStorageFolder(images);
+
+          images.items[2].etag = "new";
+          cacheFolder.addEventListener("rise-storage-response", listener);
+          cacheFolder._handleStorageFolder(images);
+
+          assert.isTrue(responded);
+          done();
+        });
+
+        test("should return URL of a file that has been added to a folder", function(done) {
+          var listener = function(response) {
+            responded = true;
+            assert.equal(response.detail.name, "images/golf.svg");
+            assert.equal(response.detail.url, "http://localhost:9494/cb=0?url=https%3A%2F%2Fwww.googleapis.com%2Fstorage%2Fv1%2Fb%2Frisemedialibrary-abc123%2Fo%2Fimages%252Fgolf.svg%3Falt%3Dmedia");
+            cacheFolder.removeEventListener("rise-storage-response", listener);
+          };
+
+          cacheFolder._handleStorageFolder(images);
+
+          images.items.push({
+            "name": "images/golf.svg",
+            "contentType": "image/svg+xml",
+            "updated": "2015-01-30T08:19:09.263Z",
+            "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fgolf.svg",
+            "etag": "CPjC1qHc7MQCEAE="
+          });
+          cacheFolder.addEventListener("rise-storage-response", listener);
+          cacheFolder._handleStorageFolder(images);
+
+          assert.isTrue(responded);
+          done();
+        });
+
+        test("should not return URL of a file that has been removed from a folder", function(done) {
+          var listener = function(response) {
+            responded = true;
+            assert.equal(response.detail.name, "images/my-image.bmp");
+            assert.equal(response.detail.url, "http://localhost:9494/?url=https%3A%2F%2Fwww.googleapis.com%2Fstorage%2Fv1%2Fb%2Frisemedialibrary-abc123%2Fo%2Fimages%252Fmy-image.bmp%3Falt%3Dmedia");
+            cacheFolder.removeEventListener("rise-storage-response", listener);
+          };
+
+          cacheFolder._handleStorageFolder(images);
+
+          images.items.pop();
+          cacheFolder.addEventListener("rise-storage-response", listener);
+          cacheFolder._handleStorageFolder(images);
+
+          assert.isTrue(responded);
+          images.items[2].etag = "CMiEudSn2MMCEAs=";
+          done();
+        });
+
+        cacheFolder._items = [];
+      });
+
+
+      suite("_getFileFromCache", function() {
+        setup(function() {
+          cacheFile._reset();
+          cacheFile._fileUrl = "http://url.to.my.file";
+        });
+
+        test("should correctly set the cache URL when loading", function() {
+          cacheFile._isLoading = true;
+          cacheFile._getFileFromCache();
+          assert.equal(cacheFile._cacheUrl, "http://localhost:9494/?url=http://url.to.my.file");
+        });
+
+        test("should correctly set the cache URL when not loading", function() {
+          cacheFile._isLoading = false;
+          cacheFile._getFileFromCache();
+          assert.equal(cacheFile._cacheUrl, "http://localhost:9494/cb=0?url=http://url.to.my.file");
+        });
+      });
+
+      suite("_getFilesFromCache", function() {
+        test("should correctly set number of total files in a folder", function() {
+          cacheFolder._getFilesFromCache(images);
+          assert.equal(cacheFolder._totalFiles, 3);
+        });
+      });
+
+      suite("_handleCacheFile", function() {
+        // Covered in e2e tests.
+      });
+
+      suite("_handleCacheFolder", function() {
+        // Covered in e2e tests.
+      });
+
+      suite("_handleCacheError", function() {
+        test("should fire rise-storage-error if there is a problem with the Rise Cache request", function(done) {
+          var resp = {
+            "xhr": {
+              "status": 404,
+              "statusText": "An error occurred"
+            }
+          },
+          listener = function(response) {
+            responded = true;
+            cacheFile.removeEventListener("rise-storage-error", listener);
+          };
+
+          cacheFile.addEventListener("rise-storage-error", listener);
+          cacheFile._handleCacheError({}, resp);
+          assert.isTrue(responded);
+          done();
+        });
+      });
+
+      suite("_handlePingResponse", function() {
+        test("should correctly set _isCacheRunning and _pingReceived if ping response is an empty string", function() {
+          cacheFile._handlePingResponse({}, { "response": "" });
+          assert.equal(cacheFile._isCacheRunning, false);
+          assert.equal(cacheFile._pingReceived, true);
+        });
+
+        test("should correctly set _isCacheRunning and _pingReceived if ping response is not an empty string", function() {
+          cacheFile._handlePingResponse({}, { "response": "_handlePingResponse();" });
+          assert.equal(cacheFile._isCacheRunning, true);
+          assert.equal(cacheFile._pingReceived, true);
+        });
+      });
+
+      suite("_handlePingError", function() {
+        test("should correctly set _isCacheRunning and _pingReceived if a ping error occurs", function() {
+          var resp = {
+            "xhr": {
+              "status": 404,
+              "statusText": "An error occurred"
+            }
+          };
+
+          cacheFile._handlePingError({}, resp);
+          assert.equal(cacheFile._isCacheRunning, false);
+          assert.equal(cacheFile._pingReceived, true);
+        });
+      });
+
+      suite("_startTimer", function() {
+        var timerSpy;
+
+        test("should correctly set refresh interval", function() {
+          cacheFolder.refresh = 10;
+          cacheFolder._startTimer();
+          assert.equal(cacheFolder.refresh, 10);
+        });
+
+        test("should enforce a minimum refresh interval", function() {
+          cacheFolder.refresh = 1;
+          cacheFolder._startTimer();
+          assert.equal(cacheFolder.refresh, 5);
+        });
+
+        test("should check for changes to a cached file", function() {
+          timerSpy = sinon.spy(cacheFile, "_getFileFromCache");
+
+          cacheFile.refresh = 5;
+          cacheFile._isFile = true;
+          cacheFile._isCacheRunning = true;
+          cacheFile._startTimer();
+
+          clock.tick(300000);
+          assert(timerSpy.calledOnce);
+        });
+
+        test("should check for changes to an uncached file", function() {
+          timerSpy = sinon.spy(cacheFile.$.storage, "generateRequest");
+
+          cacheFile._isCacheRunning = false;
+          cacheFile._startTimer();
+
+          clock.tick(300000);
+          assert(timerSpy.calledOnce);
+        });
+
+        test("should check for changes to a folder", function() {
+          timerSpy = sinon.spy(cacheFolder.$.storage, "generateRequest");
+
+          cacheFolder._isFile = false;
+          cacheFolder._startTimer();
+
+          clock.tick(300000);
+          assert(timerSpy.calledOnce);
+        });
+      });
+
+      suite("_setFileUrl", function() {
+        test("should correctly set fileUrl for a file in the root of the bucket when Rise Cache is running", function() {
+          cacheFile._isCacheRunning = true;
+          cacheFile._setFileUrl(bucketImage);
+          assert.equal(cacheFile._fileUrl, "https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fhome.jpg");
+        });
+
+        test("should correctly set _fileUrl for a file in a folder when Rise Cache is running", function() {
+          cacheFolder._isCacheRunning = true;
+          cacheFolder._setFileUrl(folderImage);
+          assert.equal(cacheFolder._fileUrl, "https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg");
+        });
+
+        test("should correctly set fileUrl for a file in the root of the bucket when Rise Cache is not running", function() {
+          cacheFile._isCacheRunning = false;
+          cacheFile._setFileUrl(bucketImage);
+          assert.equal(cacheFile._fileUrl, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg" + suffix);
+        });
+
+        test("should correctly set fileUrl for a file in a folder when Rise Cache is not running", function() {
+          cacheFolder._isCacheRunning = false;
+          cacheFolder._setFileUrl(folderImage);
+          assert.equal(cacheFolder._fileUrl, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg" + suffix);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
