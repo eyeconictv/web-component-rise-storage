@@ -184,6 +184,11 @@
           cacheFolder._getFilesFromCache(images);
           assert.equal(cacheFolder._totalFiles, 3);
         });
+
+        test("should correctly set number of total files in a folder with subfolders", function() {
+          cacheFolder._getFilesFromCache(imagesAndFolders);
+          assert.equal(cacheFolder._totalFiles, 2);
+        });
       });
 
       suite("_handleCacheFile", function() {
