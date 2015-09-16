@@ -49,14 +49,13 @@
           cacheFile._fileUrl = "https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fhome.jpg";
         });
 
-        teardown(function() {
-          cacheFile.removeEventListener("rise-storage-response", responseHandler);
-        });
-
         test("should return the correct URL for a specific file in a bucket", function(done) {
           responseHandler = function(response) {
             assert.equal(response.detail.name, "home.jpg");
             assert.equal(response.detail.url, "http://localhost:9494/?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fhome.jpg");
+
+            cacheFile.removeEventListener("rise-storage-response", responseHandler);
+
             done();
           };
 
@@ -82,10 +81,13 @@
           responseHandler = function(response) {
             assert.equal(response.detail.name, "home.jpg");
             assert.equal(response.detail.url, "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fhome.jpg");
+
+            cacheFile.removeEventListener("rise-storage-response", responseHandler);
+
             done();
           };
 
-          cacheFile._items.push({
+          cacheFile._files.push({
             "name": "home.jpg", "lastModified": ""
           });
 
@@ -105,14 +107,13 @@
           cacheFileFolder._fileUrl = "https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg";
         });
 
-        teardown(function() {
-          cacheFileFolder.removeEventListener("rise-storage-response", responseHandler);
-        });
-
         test("should return the correct URL for a specific file in a folder", function(done) {
           responseHandler = function(response) {
             assert.equal(response.detail.name, "images/home.jpg");
             assert.equal(response.detail.url, "http://localhost:9494/?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg");
+
+            cacheFileFolder.removeEventListener("rise-storage-response", responseHandler);
+
             done();
           };
 
@@ -138,10 +139,13 @@
           responseHandler = function(response) {
             assert.equal(response.detail.name, "images/home.jpg");
             assert.equal(response.detail.url, "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg");
+
+            cacheFileFolder.removeEventListener("rise-storage-response", responseHandler);
+
             done();
           };
 
-          cacheFileFolder._items.push({
+          cacheFileFolder._files.push({
             "name": "risemedialibrary-abc123/images/home.jpg", "lastModified": ""
           });
 

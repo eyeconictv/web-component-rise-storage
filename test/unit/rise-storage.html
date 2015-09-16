@@ -131,7 +131,7 @@
 
       suite("_handleStorageFile", function() {
         suite("bucket file", function() {
-          var url = bucketImage.selfLink;
+          var url = bucketImage.files[0].selfLink;
 
           setup(function() {
             fileBucket._reset();
@@ -178,7 +178,7 @@
 
             fileBucket._fileUrl = url + suffix;
             fileBucket._handleStorageFile(bucketImage);
-            bucketImage.etag = "new";
+            bucketImage.files[0].etag = "new";
             fileBucket.addEventListener("rise-storage-response", listener);
             fileBucket._handleStorageFile(bucketImage);
 
@@ -187,11 +187,11 @@
             done();
           });
 
-          fileBucket._items = [];
+          fileBucket._files = [];
         });
 
         suite("folder file", function() {
-          var url = folderImage.items[0].selfLink;
+          var url = folderImage.files[0].selfLink;
 
           setup(function() {
             fileFolder._reset();
@@ -238,16 +238,16 @@
 
             fileFolder._fileUrl = url + suffix;
             fileFolder._handleStorageFile(folderImage);
-            folderImage.items[0].etag = "new";
+            folderImage.files[0].etag = "new";
             fileFolder.addEventListener("rise-storage-response", listener);
             fileFolder._handleStorageFile(folderImage);
 
             assert.isTrue(responded);
-            folderImage.items[0].etag = "COjLvarr/cQCEAE=";
+            folderImage.files[0].etag = "COjLvarr/cQCEAE=";
             done();
           });
 
-          fileFolder._items = [];
+          fileFolder._files = [];
         });
       });
 
@@ -324,7 +324,7 @@
 
           folder._handleStorageFolder(images);
 
-          images.items[2].etag = "new";
+          images.files[2].etag = "new";
           folder.addEventListener("rise-storage-response", listener);
           folder._handleStorageFolder(images);
 
@@ -343,7 +343,7 @@
 
           folder._handleStorageFolder(images);
 
-          images.items.push({
+          images.files.push({
             "name": "images/golf.svg",
             "contentType": "image/svg+xml",
             "updated": "2015-01-30T08:19:09.263Z",
@@ -368,13 +368,57 @@
 
           folder._handleStorageFolder(images);
 
-          images.items.pop();
+          images.files.pop();
           folder.addEventListener("rise-storage-response", listener);
           folder._handleStorageFolder(images);
 
           assert.isTrue(responded);
-          images.items[2].etag = "CMiEudSn2MMCEAs=";
+          images.files[2].etag = "CMiEudSn2MMCEAs=";
           done();
+        });
+      });
+
+      suite("_isEmptyFolder", function() {
+        test("should return false for a file in the root of the bucket", function() {
+          assert.equal(fileBucket._isEmptyFolder(bucketImage), false);
+        });
+
+        test("should return false for a file in a folder", function() {
+          assert.equal(fileFolder._isEmptyFolder(folderImage), false);
+        });
+
+        test("should return false for a folder that has files", function() {
+          assert.equal(folder._isEmptyFolder(images), false);
+        });
+
+        test("should return false if the folder does not exist", function() {
+          assert.equal(folder._isEmptyFolder(noFolder), false);
+        });
+
+        test("should return true for an empty folder", function() {
+          assert.equal(folder._isEmptyFolder(emptyFolder), true);
+        });
+      });
+
+      suite("_noFolderExists", function() {
+        test("should return false for a file in the root of the bucket", function() {
+          assert.equal(fileBucket._noFolderExists(bucketImage), false);
+        });
+
+        test("should return false for a file in a folder", function() {
+          assert.equal(fileFolder._noFolderExists(folderImage), false);
+        });
+
+        test("should return false for a folder that has files", function() {
+          assert.equal(folder._noFolderExists(images), false);
+        });
+
+        test("should return false for an empty folder", function() {
+          assert.equal(folder._noFolderExists(emptyFolder), false);
+        });
+
+        test("should return true if the folder does not exist", function() {
+          assert.equal(folder._noFolderExists(noFolder), true);
         });
       });
 

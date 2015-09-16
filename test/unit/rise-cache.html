@@ -105,7 +105,7 @@
 
           cacheFolder._handleStorageFolder(images);
 
-          images.items[2].etag = "new";
+          images.files[2].etag = "new";
           cacheFolder.addEventListener("rise-storage-response", listener);
           cacheFolder._handleStorageFolder(images);
 
@@ -123,7 +123,7 @@
 
           cacheFolder._handleStorageFolder(images);
 
-          images.items.push({
+          images.files.push({
             "name": "images/golf.svg",
             "contentType": "image/svg+xml",
             "updated": "2015-01-30T08:19:09.263Z",
@@ -147,16 +147,16 @@
 
           cacheFolder._handleStorageFolder(images);
 
-          images.items.pop();
+          images.files.pop();
           cacheFolder.addEventListener("rise-storage-response", listener);
           cacheFolder._handleStorageFolder(images);
 
           assert.isTrue(responded);
-          images.items[2].etag = "CMiEudSn2MMCEAs=";
+          images.files[2].etag = "CMiEudSn2MMCEAs=";
           done();
         });
 
-        cacheFolder._items = [];
+        cacheFolder._files = [];
       });
 
 

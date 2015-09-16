@@ -1,6 +1,6 @@
 var header = { "Content-Type": "text/json" },
   images = {
-    "items": [{
+    "files": [{
       "name": "images/",
       "contentType": "text/plain",
       "updated": "2015-02-04T17:44:00.549Z",
@@ -30,7 +30,7 @@ var header = { "Content-Type": "text/json" },
     }]
   },
   mixedMedia = {
-    "items": [{
+    "files": [{
       "name": "images/",
       "contentType": "text/plain",
       "updated": "2015-02-04T17:44:00.549Z",
@@ -95,7 +95,7 @@ var header = { "Content-Type": "text/json" },
     }]
   },
   folderImage = {
-    "items": [{
+    "files": [{
       "name": "images/home.jpg",
       "contentType": "image/jpeg",
       "updated": "2015-02-04T17:45:25.945Z",
@@ -104,14 +104,25 @@ var header = { "Content-Type": "text/json" },
     }]
   },
   bucketImage = {
-    "name": "home.jpg",
-    "contentType": "image/jpeg",
-    "updated": "2015-02-04T17:45:25.945Z",
-    "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg",
-    "etag": "COjLvarr/cQCEAE="
+    "result": true,
+    "code": 200,
+    "files": [{
+      "contentType": "image/jpeg",
+      "etag": "COjLvarr/cQCEAE=",
+      "name": "home.jpg",
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg",
+      "updated": {
+        "value": "1431455000152",
+        "dateOnly": false,
+        "timeZoneShift": 0
+      },
+    }],
+    "bucketExists": true,
+    "kind": "storage#filesItem",
+    "etag": "\"-xn2BkoYzbrr0EhwVLI1-3fTi7c/1Ev8FzsCppGm6uDNrJyFySGIKrI\""
   },
   imagesAndFolders = {
-    "items": [{
+    "files": [{
       "name": "images/",
       "contentType": "text/plain",
       "updated": "2015-02-04T17:44:00.549Z",
@@ -146,5 +157,30 @@ var header = { "Content-Type": "text/json" },
       "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fsubfolder2%2F",
       "etag": "CIjxrtzryMMCEAE="
     }]
+  },
+  noFolder = {
+    "result": true,
+    "code": 200,
+    "bucketExists": true,
+    "kind": "storage#filesItem",
+    "etag": "\"-xn2BkoYzbrr0EhwVLI1-3fTi7c/nRo7jDSle-_CoystXctokYbq8Pc\""
+  },
+  emptyFolder = {
+    "result": true,
+    "code": 200,
+    "files": [{
+      "contentType": "text/plain",
+      "etag": "CODYtNjV+ccCEAE=",
+      "name": "Donna/",
+      "selfLink": "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2F",
+      "updated": {
+        "value": "1442341739897",
+        "dateOnly": false,
+        "timeZoneShift": 0
+      }
+    }],
+    "bucketExists": true,
+    "kind": "storage#filesItem",
+    "etag": "\"-xn2BkoYzbrr0EhwVLI1-3fTi7c/1Ev8FzsCppGm6uDNrJyFySGIKrI\""
   },
   xhr, requests;
