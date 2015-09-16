@@ -53,7 +53,7 @@
         });
 
         teardown(function() {
-          bucketImage.etag = "COjLvarr/cQCEAE=";
+          bucketImage.files[0].etag = "COjLvarr/cQCEAE=";
           file.removeEventListener("rise-storage-response", responseHandler);
         });
 
@@ -90,7 +90,7 @@
           };
 
           var localBucketImage = JSON.parse(JSON.stringify(bucketImage));
-          localBucketImage.etag = "new";
+          localBucketImage.files[0].etag = "new";
 
           file.addEventListener("rise-storage-response", responseHandler);
           server.respondWith([200, header, JSON.stringify(localBucketImage)]);
@@ -161,7 +161,7 @@
           fileFolder.go();
           server.respond();
 
-          folderImage.items[0].etag = "new";
+          folderImage.files[0].etag = "new";
 
           server.respondWith([200, header, JSON.stringify(folderImage)]);
           fileFolder.go();
@@ -238,7 +238,7 @@
           folder.go();
           server.respond();
 
-          images.items[2].etag = "new";
+          images.files[2].etag = "new";
 
           server.respondWith([200, header, JSON.stringify(images)]);
           folder.go();
@@ -263,7 +263,7 @@
           folder.go();
           server.respond();
 
-          images.items.push({
+          images.files.push({
             "name": "images/golf.svg",
             "contentType": "image/svg+xml",
             "updated": "2015-01-30T08:19:09.263Z",
@@ -304,11 +304,157 @@
           folder.go();
           server.respond();
 
-          images.items.pop();
+          images.files.pop();
 
           server.respondWith([200, header, JSON.stringify(images)]);
           folder.go();
           server.respond();
+        });
+      });
+
+      suite("rise-storage-empty-folder", function() {
+        setup(function() {
+          folder._reset();
+          folder._isCacheRunning = false;
+          folder._pingReceived = true;
+        });
+
+        teardown(function() {
+          folder.removeEventListener("rise-storage-empty-folder", responseHandler);
+        });
+
+        test("should fire rise-storage-empty-folder if a folder is empty", function(done) {
+          responseHandler = function(response) {
+            assert.isObject(response.detail, "response.detail is an object");
+            assert.deepEqual(response.detail, {}, "response.detail is an empty object");
+
+            done();
+          };
+
+          folder.addEventListener("rise-storage-empty-folder", responseHandler);
+          server.respondWith([200, header, JSON.stringify(emptyFolder)]);
+          folder.go();
+          server.respond();
+        });
+
+        test("should not fire rise-storage-empty-folder if a folder does not exist", function(done) {
+          responseHandler = sinon.spy();
+
+          folder.addEventListener("rise-storage-empty-folder", responseHandler);
+          server.respondWith([200, header, JSON.stringify(noFolder)]);
+          folder.go();
+          server.respond();
+
+          assert(responseHandler.notCalled);
+          done();
+        });
+
+        test("should not fire rise-storage-empty-folder if a folder does exist", function(done) {
+          responseHandler = sinon.spy();
+
+          folder.addEventListener("rise-storage-empty-folder", responseHandler);
+          server.respondWith([200, header, JSON.stringify(images)]);
+          folder.go();
+          server.respond();
+
+          assert(responseHandler.notCalled);
+          done();
+        });
+
+        test("should not fire rise-storage-empty-folder if the request is for a bucket file", function(done) {
+          responseHandler = sinon.spy();
+
+          file.addEventListener("rise-storage-empty-folder", responseHandler);
+          server.respondWith([200, header, JSON.stringify(bucketImage)]);
+          file.go();
+          server.respond();
+
+          assert(responseHandler.notCalled);
+          done();
+        });
+
+        test("should not fire rise-storage-empty-folder if the request is for a file in a folder", function(done) {
+          responseHandler = sinon.spy();
+
+          fileFolder.addEventListener("rise-storage-empty-folder", responseHandler);
+          server.respondWith([200, header, JSON.stringify(folderImage)]);
+          fileFolder.go();
+          server.respond();
+
+          assert(responseHandler.notCalled);
+          done();
+        });
+      });
+
+      suite("rise-storage-no-folder", function() {
+        setup(function() {
+          folder._reset();
+          folder._isCacheRunning = false;
+          folder._pingReceived = true;
+        });
+
+        test("should fire rise-storage-no-folder if a folder does not exist", function(done) {
+          responseHandler = function(response) {
+            assert.isObject(response.detail, "response.detail is an object");
+            assert.deepEqual(response.detail, {}, "response.detail is an empty object");
+
+            folder.removeEventListener("rise-storage-no-folder", responseHandler);
+
+            done();
+          };
+
+          folder.addEventListener("rise-storage-no-folder", responseHandler);
+          server.respondWith([200, header, JSON.stringify(noFolder)]);
+          folder.go();
+          server.respond();
+        });
+
+        test("should not fire rise-storage-no-folder if a folder does exist", function(done) {
+          responseHandler = sinon.spy();
+
+          folder.addEventListener("rise-storage-no-folder", responseHandler);
+          server.respondWith([200, header, JSON.stringify(images)]);
+          folder.go();
+          server.respond();
+
+          assert(responseHandler.notCalled);
+          done();
+        });
+
+        test("should not fire rise-storage-no-folder if a folder is empty", function(done) {
+          responseHandler = sinon.spy();
+
+          folder.addEventListener("rise-storage-no-folder", responseHandler);
+          server.respondWith([200, header, JSON.stringify(emptyFolder)]);
+          folder.go();
+          server.respond();
+
+          assert(responseHandler.notCalled);
+          done();
+        });
+
+        test("should not fire rise-storage-no-folder if the request is for a bucket file", function(done) {
+          responseHandler = sinon.spy();
+
+          file.addEventListener("rise-storage-no-folder", responseHandler);
+          server.respondWith([200, header, JSON.stringify(bucketImage)]);
+          file.go();
+          server.respond();
+
+          assert(responseHandler.notCalled);
+          done();
+        });
+
+        test("should not fire rise-storage-no-folder if the request is for a file in a folder", function(done) {
+          responseHandler = sinon.spy();
+
+          fileFolder.addEventListener("rise-storage-no-folder", responseHandler);
+          server.respondWith([200, header, JSON.stringify(folderImage)]);
+          fileFolder.go();
+          server.respond();
+
+          assert(responseHandler.notCalled);
+          done();
         });
       });
 
