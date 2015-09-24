@@ -119,6 +119,7 @@ The web component returns a JSON response for each file matching the provided cr
 | `rise-storage-error`        | Fired when an error is received.                            |
 | `rise-storage-empty-folder` | Fired when the request is for a folder that is empty.       |
 | `rise-storage-no-folder`    | Fired when the request is for a folder that does not exist. |
+| `rise-storage-no-file`      | Fired when the request is for a specified file that does not exist. |
 
 
 ### Methods

@@ -458,6 +458,83 @@
         });
       });
 
+      suite("rise-storage-no-file", function() {
+        setup(function() {
+          file._reset();
+          file._isCacheRunning = false;
+          file._pingReceived = true;
+        });
+
+        test("should fire rise-storage-no-file if a bucket file does not exist", function(done) {
+          responseHandler = function(response) {
+            assert.isObject(response.detail, "response.detail is an object");
+            assert.deepEqual(response.detail, {}, "response.detail is an empty object");
+
+            file.removeEventListener("rise-storage-no-file", responseHandler);
+
+            done();
+          };
+
+          file.addEventListener("rise-storage-no-file", responseHandler);
+          server.respondWith([200, header, JSON.stringify(noFolder)]);
+          file.go();
+          server.respond();
+        });
+
+        test("should fire rise-storage-no-file if a folder file does not exist", function(done) {
+          responseHandler = function(response) {
+            assert.isObject(response.detail, "response.detail is an object");
+            assert.deepEqual(response.detail, {}, "response.detail is an empty object");
+
+            fileFolder.removeEventListener("rise-storage-no-file", responseHandler);
+
+            done();
+          };
+
+          fileFolder.addEventListener("rise-storage-no-file", responseHandler);
+          server.respondWith([200, header, JSON.stringify(noFolder)]);
+          fileFolder.go();
+          server.respond();
+        });
+
+        test("should not fire rise-storage-no-file if a bucket file does exist", function(done) {
+          responseHandler = sinon.spy();
+
+          file.addEventListener("rise-storage-no-file", responseHandler);
+          server.respondWith([200, header, JSON.stringify(bucketImage)]);
+          file.go();
+          server.respond();
+
+          assert(responseHandler.notCalled);
+          done();
+        });
+
+        test("should not fire rise-storage-no-file if a folder file does exist", function(done) {
+          responseHandler = sinon.spy();
+
+          fileFolder.addEventListener("rise-storage-no-file", responseHandler);
+          server.respondWith([200, header, JSON.stringify(folderImage)]);
+          fileFolder.go();
+          server.respond();
+
+          assert(responseHandler.notCalled);
+          done();
+        });
+
+        test("should not fire rise-storage-no-file if the request is for a folder", function(done) {
+          responseHandler = sinon.spy();
+
+          folder.addEventListener("rise-storage-no-file", responseHandler);
+          server.respondWith([200, header, JSON.stringify(images)]);
+          folder.go();
+          server.respond();
+
+          assert(responseHandler.notCalled);
+          done();
+        });
+
+      });
+
       suite("filtering", function() {
         setup(function() {
           fileType._reset();
