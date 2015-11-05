@@ -74,7 +74,7 @@
       suite("_computeStorageUrl", function() {
         test("should correctly set Storage request URL if no companyId attribute is specified", function() {
           noCompany._computeStorageUrl();
-          assert.equal(noCompany.$.storage.url, "");
+          assert.equal(noCompany.$.storage.url, undefined);
         });
 
         test("should correctly set Storage request URL for a folder", function() {
@@ -110,9 +110,26 @@
       });
 
       suite("_handleStorageError", function() {
-        test("should fire rise-storage-error if there is a problem with the Storage request", function(done) {
+        test("should fire rise-storage-file-throttled if Storage returns a 403 status code", function(done) {
           var resp = {
-            "xhr": {
+            "request": {
+              "status": 403
+            }
+          },
+          listener = function(response) {
+            responded = true;
+            fileBucket.removeEventListener("rise-storage-file-throttled", listener);
+          };
+
+          fileBucket.addEventListener("rise-storage-file-throttled", listener);
+          fileBucket._handleStorageError({}, resp);
+          assert.isTrue(responded);
+          done();
+        });
+
+        test("should fire rise-storage-error if Storage returns a 404 status code", function(done) {
+          var resp = {
+            "request": {
               "status": 404,
               "statusText": "An error occurred"
             }
@@ -419,6 +436,40 @@
 
         test("should return true if the folder does not exist", function() {
           assert.equal(folder._noFolderExists(noFolder), true);
+        });
+      });
+
+      suite("_isThrottled", function() {
+        var resp;
+
+        setup(function() {
+          resp = {};
+        });
+
+        test("should return true if response has a 403 status code", function() {
+          resp.request = { "status": 403 };
+
+          assert.equal(fileBucket._isThrottled(resp), true);
+        });
+
+        test("should return false if response has a 404 status code", function() {
+          resp.request = { "status": 404 };
+
+          assert.equal(fileBucket._isThrottled(resp), false);
+        });
+
+        test("should return false if response not passed as parameter", function() {
+          assert.equal(fileBucket._isThrottled(), false);
+        });
+
+        test("should return false if response has no request property", function() {
+          assert.equal(fileBucket._isThrottled(resp), false);
+        });
+
+        test("should return false if response has no request.status property", function() {
+          resp.request = {};
+
+          assert.equal(fileBucket._isThrottled(resp), false);
         });
       });
 
