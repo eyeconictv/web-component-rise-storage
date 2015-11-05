@@ -532,7 +532,80 @@
           assert(responseHandler.notCalled);
           done();
         });
+      });
 
+      suite("rise-storage-file-throttled", function() {
+        test("should fire rise-storage-file-throttled if Storage returns 403 for a bucket file", function(done) {
+          responseHandler = function(response) {
+            assert.isObject(response.detail, "response.detail is an object");
+            assert.isObject(response.detail.error, "response.detail.error is an object");
+
+            file.removeEventListener("rise-storage-file-throttled", responseHandler);
+
+            done();
+          };
+
+          // This is required in order to force iron-ajax.html to proceed with firing an error.
+          file.$.storage.verbose = false;
+          file.addEventListener("rise-storage-file-throttled", responseHandler);
+          server.respondWith([403, header, JSON.stringify(bucketImage)]);
+          file.go();
+          server.respond();
+        });
+
+        test("should fire rise-storage-file-throttled if Storage returns 403 for a folder file", function(done) {
+          responseHandler = function(response) {
+            assert.isObject(response.detail, "response.detail is an object");
+            assert.isObject(response.detail.error, "response.detail.error is an object");
+
+            fileFolder.removeEventListener("rise-storage-file-throttled", responseHandler);
+
+            done();
+          };
+
+          // This is required in order to force iron-ajax.html to proceed with firing an error.
+          fileFolder.$.storage.verbose = false;
+          fileFolder.addEventListener("rise-storage-file-throttled", responseHandler);
+          server.respondWith([403, header, JSON.stringify(folderImage)]);
+          fileFolder.go();
+          server.respond();
+        });
+
+        test("should not fire rise-storage-file-throttled if Storage returns 200 for a bucket file", function(done) {
+          responseHandler = sinon.spy();
+
+          file.addEventListener("rise-storage-file-throttled", responseHandler);
+          server.respondWith([200, header, JSON.stringify(bucketImage)]);
+          file.go();
+          server.respond();
+
+          assert(responseHandler.notCalled);
+          done();
+        });
+
+        test("should not fire rise-storage-file-throttled if Storage returns 200 for a folder file", function(done) {
+          responseHandler = sinon.spy();
+
+          fileFolder.addEventListener("rise-storage-file-throttled", responseHandler);
+          server.respondWith([200, header, JSON.stringify(folderImage)]);
+          fileFolder.go();
+          server.respond();
+
+          assert(responseHandler.notCalled);
+          done();
+        });
+
+        test("should not fire rise-storage-file-throttled if the request is for a folder", function(done) {
+          responseHandler = sinon.spy();
+
+          folder.addEventListener("rise-storage-file-throttled", responseHandler);
+          server.respondWith([200, header, JSON.stringify(images)]);
+          folder.go();
+          server.respond();
+
+          assert(responseHandler.notCalled);
+          done();
+        });
       });
 
       suite("filtering", function() {
