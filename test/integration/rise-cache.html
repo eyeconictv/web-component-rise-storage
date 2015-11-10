@@ -12,7 +12,7 @@
 </head>
 <body>
   <rise-storage id="cache-file" companyId="abc123" fileName="home.jpg"></rise-storage>
-  <rise-storage id="cache-file-folder" companyId="abc123" folder="images" fileName="home.jpg"></rise-storage>
+  <rise-storage id="cache-file-folder" companyId="abc123" folder="images" fileName="home.jpg" refresh="5"></rise-storage>
 
   <script src="../js/rise-storage-data.js"></script>
   <script>
@@ -153,6 +153,64 @@
           cacheFileFolder.addEventListener("rise-storage-response", responseHandler);
           server.respondWith([200, newCacheHeader, ""]);
           cacheFileFolder._getFileFromCache();
+          server.respond();
+        });
+      });
+
+      suite("rise-storage-file-throttled", function() {
+        var timerSpy = null;
+
+        suiteSetup(function() {
+          folderImage.files[0].isThrottled = true;
+        });
+
+        setup (function() {
+          cacheFileFolder._pingReceived = true;
+          cacheFileFolder._isCacheRunning = true;
+        })
+
+        suiteTeardown(function() {
+          folderImage.files[0].isThrottled = false;
+        });
+
+        test("should make a request to Storage after 5 minutes to check if a file is still throttled", function(done) {
+          responseHandler = function(response) {
+            timerSpy = sinon.spy(cacheFileFolder, "_loadStorage");
+
+            clock.tick(299999);
+            assert(timerSpy.notCalled);
+            clock.tick(300000);
+            assert(timerSpy.calledOnce);
+
+            cacheFileFolder.removeEventListener("rise-storage-file-throttled", responseHandler);
+
+            done();
+          };
+
+          cacheFileFolder.addEventListener("rise-storage-file-throttled", responseHandler);
+          server.respondWith([200, header, JSON.stringify(folderImage)]);
+          cacheFileFolder.go();
+          server.respond();
+        });
+
+        test("should make a request to Rise Cache after 5 minutes if a file that was throttled is no longer throttled", function(done) {
+          responseHandler = function(response) {
+            cacheFileFolder._fileThrottled = false;
+            timerSpy = sinon.spy(cacheFileFolder, "_getFileFromCache");
+
+            clock.tick(299999);
+            assert(timerSpy.notCalled);
+            clock.tick(300000);
+            assert(timerSpy.calledOnce);
+
+            cacheFileFolder.removeEventListener("rise-storage-file-throttled", responseHandler);
+
+            done();
+          };
+
+          cacheFileFolder.addEventListener("rise-storage-file-throttled", responseHandler);
+          server.respondWith([200, header, JSON.stringify(folderImage)]);
+          cacheFileFolder.go();
           server.respond();
         });
       });
