@@ -13,6 +13,7 @@
     </iron-ajax>
 
     <iron-ajax id="cache"
+      method="{{_cacheRequestMethod}}"
       url="{{_cacheUrl}}"
       handle-as="text"
       on-response="_handleCacheResponse"
@@ -142,6 +143,24 @@
      * @default ""
      */
     _cacheUrl: "",
+
+    /**
+     * The method for the Cache request.
+     *
+     * @property _cacheRequestMethod
+     * @type string
+     * @default "HEAD"
+     */
+    _cacheRequestMethod: "HEAD",
+
+    /**
+     * The flag for making a get request if it wasn't done yet.
+     *
+     * @property _hasAttemptedGetRequest
+     * @type string
+     * @default false
+     */
+    _hasAttemptedGetRequest: false,
 
     /**
      * The URL target of the Cache request.
@@ -800,8 +819,15 @@
      * Fires when an error is received from the Rise Cache request.
      */
     _handleCacheError: function(e, resp) {
-      this._startTimer();
-      this.fire("rise-storage-error", resp);
+      if ( !this._hasAttemptedGetRequest ) {
+        this._cacheRequestMethod = "GET";
+        this.$.cache.generateRequest();
+        this._hasAttemptedGetRequest = true;
+      }
+      else {
+        this._startTimer();
+        this.fire("rise-storage-error", resp);
+      }
     },
 
     /**
@@ -1177,6 +1203,8 @@
       this._totalFiles = 0;
       this._totalFilesBefore = 0;
       this._isChanged = false;
+      this._cacheRequestMethod = "HEAD";
+      this._hasAttemptedGetRequest = false;
     }
   });
 </script>
