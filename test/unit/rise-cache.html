@@ -166,6 +166,11 @@
           cacheFile._fileUrl = "http://url.to.my.file";
         });
 
+        test("should correctly set the cache request method to HEAD", function() {
+          cacheFile._getFileFromCache();
+          assert.equal(cacheFile._cacheRequestMethod, "HEAD");
+        });
+
         test("should correctly set the cache URL when loading", function() {
           cacheFile._isLoading = true;
           cacheFile._getFileFromCache();
@@ -180,6 +185,12 @@
       });
 
       suite("_getFilesFromCache", function() {
+
+        test("should correctly set the cache request method to HEAD", function() {
+          cacheFolder._getFileFromCache(images);
+          assert.equal(cacheFolder._cacheRequestMethod, "HEAD");
+        });
+
         test("should correctly set number of total files in a folder", function() {
           cacheFolder._getFilesFromCache(images);
           assert.equal(cacheFolder._totalFiles, 3);
