@@ -169,6 +169,7 @@
         test("should correctly set the cache request method to HEAD", function() {
           cacheFile._getFileFromCache();
           assert.equal(cacheFile._cacheRequestMethod, "HEAD");
+          assert.equal(cacheFile._hasAttemptedGetRequest, false);
         });
 
         test("should correctly set the cache URL when loading", function() {
@@ -187,8 +188,9 @@
       suite("_getFilesFromCache", function() {
 
         test("should correctly set the cache request method to HEAD", function() {
-          cacheFolder._getFileFromCache(images);
+          cacheFolder._getFilesFromCache(images);
           assert.equal(cacheFolder._cacheRequestMethod, "HEAD");
+          assert.equal(cacheFolder._hasAttemptedGetRequest, false);
         });
 
         test("should correctly set number of total files in a folder", function() {
