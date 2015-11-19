@@ -166,12 +166,6 @@
           cacheFile._fileUrl = "http://url.to.my.file";
         });
 
-        test("should correctly set the cache request method to HEAD", function() {
-          cacheFile._getFileFromCache();
-          assert.equal(cacheFile._cacheRequestMethod, "HEAD");
-          assert.equal(cacheFile._hasAttemptedGetRequest, false);
-        });
-
         test("should correctly set the cache URL when loading", function() {
           cacheFile._isLoading = true;
           cacheFile._getFileFromCache();
@@ -186,12 +180,6 @@
       });
 
       suite("_getFilesFromCache", function() {
-
-        test("should correctly set the cache request method to HEAD", function() {
-          cacheFolder._getFilesFromCache(images);
-          assert.equal(cacheFolder._cacheRequestMethod, "HEAD");
-          assert.equal(cacheFolder._hasAttemptedGetRequest, false);
-        });
 
         test("should correctly set number of total files in a folder", function() {
           cacheFolder._getFilesFromCache(images);
@@ -214,25 +202,6 @@
 
       suite("_handleCacheError", function() {
 
-        test("should retry Rise Cache request with GET method if it fails the first time", function(done) {
-          var resp = {
-              "xhr": {
-                "status": 404,
-                "statusText": "An error occurred"
-              }
-            },
-            listener = function(response) {
-              responded = true;
-              cacheFile.removeEventListener("rise-storage-error", listener);
-            };
-          cacheFile._hasAttemptedGetRequest = false;
-          cacheFile.addEventListener("rise-storage-error", listener);
-          cacheFile._handleCacheError({}, resp);
-          assert.isFalse(responded);
-          assert.equal(cacheFile._cacheRequestMethod, "GET");
-          done();
-        });
-
         test("should fire rise-storage-error if there is a problem with the Rise Cache request", function(done) {
           var resp = {
             "xhr": {
@@ -244,7 +213,6 @@
             responded = true;
             cacheFile.removeEventListener("rise-storage-error", listener);
           };
-          cacheFile._hasAttemptedGetRequest = true;
           cacheFile.addEventListener("rise-storage-error", listener);
           cacheFile._handleCacheError({}, resp);
           assert.isTrue(responded);
