@@ -186,11 +186,14 @@
       });
 
       suite("_getFilesFromCache", function() {
+        var spy;
 
-        test("should correctly set the cache request method to HEAD", function() {
-          cacheFolder._getFilesFromCache(images);
-          assert.equal(cacheFolder._cacheRequestMethod, "HEAD");
-          assert.equal(cacheFolder._hasAttemptedGetRequest, false);
+        setup(function () {
+          spy = sinon.spy(cacheFolder, "_requestCacheFolderFile");
+        });
+
+        teardown(function () {
+          cacheFolder._requestCacheFolderFile.restore();
         });
 
         test("should correctly set number of total files in a folder", function() {
@@ -201,6 +204,26 @@
         test("should correctly set number of total files in a folder with subfolders", function() {
           cacheFolder._getFilesFromCache(imagesAndFolders);
           assert.equal(cacheFolder._totalFiles, 2);
+        });
+
+        test("should correctly set list of items in a folder to request", function () {
+          cacheFolder._getFilesFromCache(images);
+          assert.deepEqual(cacheFolder._folderFilesToRequest, images.files.slice(1));
+        });
+
+        test("should correctly request for first item in folder file list", function () {
+          cacheFolder._getFilesFromCache(images);
+          assert(spy.calledWith(images.files[1]));
+        });
+
+      });
+
+      suite("_requestCacheFolderFile", function () {
+
+        test("should correctly set the cache request method to HEAD", function() {
+          cacheFolder._requestCacheFolderFile(images.files[0]);
+          assert.equal(cacheFolder._cacheRequestMethod, "HEAD");
+          assert.equal(cacheFolder._hasAttemptedGetRequest, false);
         });
       });
 
