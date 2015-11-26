@@ -395,8 +395,8 @@
 
         test("should fire rise-storage-no-folder if a folder does not exist", function(done) {
           responseHandler = function(response) {
-            assert.isObject(response.detail, "response.detail is an object");
-            assert.deepEqual(response.detail, {}, "response.detail is an empty object");
+            assert.isString(response.detail, "response.detail is a String");
+            assert.deepEqual(response.detail, "images", "response.detail is the path to the file");
 
             folder.removeEventListener("rise-storage-no-folder", responseHandler);
 
@@ -467,8 +467,8 @@
 
         test("should fire rise-storage-no-file if a bucket file does not exist", function(done) {
           responseHandler = function(response) {
-            assert.isObject(response.detail, "response.detail is an object");
-            assert.deepEqual(response.detail, {}, "response.detail is an empty object");
+            assert.isString(response.detail, "response.detail is a String");
+            assert.deepEqual(response.detail, "/home.jpg", "response.detail is the path to the file");
 
             file.removeEventListener("rise-storage-no-file", responseHandler);
 
@@ -483,8 +483,8 @@
 
         test("should fire rise-storage-no-file if a folder file does not exist", function(done) {
           responseHandler = function(response) {
-            assert.isObject(response.detail, "response.detail is an object");
-            assert.deepEqual(response.detail, {}, "response.detail is an empty object");
+            assert.isString(response.detail, "response.detail is a String");
+            assert.deepEqual(response.detail, "images/home.jpg", "response.detail is the path to the file");
 
             fileFolder.removeEventListener("rise-storage-no-file", responseHandler);
 

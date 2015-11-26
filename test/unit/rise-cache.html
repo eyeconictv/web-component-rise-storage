@@ -246,17 +246,17 @@
             },
             listener = function(response) {
               responded = true;
-              cacheFile.removeEventListener("rise-storage-error", listener);
+              cacheFile.removeEventListener("rise-cache-error", listener);
             };
           cacheFile._hasAttemptedGetRequest = false;
-          cacheFile.addEventListener("rise-storage-error", listener);
+          cacheFile.addEventListener("rise-cache-error", listener);
           cacheFile._handleCacheError({}, resp);
           assert.isFalse(responded);
           assert.equal(cacheFile._cacheRequestMethod, "GET");
           done();
         });
 
-        test("should fire rise-storage-error if there is a problem with the Rise Cache request", function(done) {
+        test("should fire rise-cache-error if there is a problem with the Rise Cache request", function(done) {
           var resp = {
             "xhr": {
               "status": 404,
@@ -265,10 +265,10 @@
           },
           listener = function(response) {
             responded = true;
-            cacheFile.removeEventListener("rise-storage-error", listener);
+            cacheFile.removeEventListener("rise-cache-error", listener);
           };
           cacheFile._hasAttemptedGetRequest = true;
-          cacheFile.addEventListener("rise-storage-error", listener);
+          cacheFile.addEventListener("rise-cache-error", listener);
           cacheFile._handleCacheError({}, resp);
           assert.isTrue(responded);
           done();
@@ -319,22 +319,10 @@
           assert.equal(cacheFolder.refresh, 5);
         });
 
-        test("should check for changes to a cached file", function() {
-          timerSpy = sinon.spy(cacheFile, "_getFileFromCache");
-
-          cacheFile.refresh = 5;
-          cacheFile._isFile = true;
-          cacheFile._isCacheRunning = true;
-          cacheFile._startTimer();
-
-          clock.tick(300000);
-          assert(timerSpy.calledOnce);
-        });
-
-        test("should check for changes to an uncached file", function() {
+        test("should check for changes to a file", function() {
           timerSpy = sinon.spy(cacheFile.$.storage, "generateRequest");
 
-          cacheFile._isCacheRunning = false;
+          cacheFile.refresh = 5;
           cacheFile._startTimer();
 
           clock.tick(300000);
