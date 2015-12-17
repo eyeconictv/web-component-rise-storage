@@ -1,6 +1,6 @@
 {
   "name": "web-component-rise-storage",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "The Rise Storage Web Component uses Google’s storage API to retrieve the URLs of all files in a particular folder, or the URL of a single file in a particular folder, from Rise Storage.",
   "scripts": {
     "test": "gulp test",
