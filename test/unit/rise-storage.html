@@ -110,22 +110,76 @@
       });
 
       suite("_handleStorageError", function() {
-        test("should fire rise-storage-error if Storage returns a 404 status code", function(done) {
-          var resp = {
-            "request": {
-              "status": 404,
-              "statusText": "An error occurred"
-            }
-          },
-          listener = function(response) {
-            responded = true;
-            fileBucket.removeEventListener("rise-storage-error", listener);
-          };
+        var resp = {
+          "request": {
+            "status": 404,
+            "statusText": "An error occurred"
+          }
+        }, errorSpy = null;
 
-          fileBucket.addEventListener("rise-storage-error", listener);
+        setup(function() {
+          errorSpy = sinon.spy();
+          fileBucket._reset();
+          fileBucket.addEventListener("rise-storage-error", errorSpy);
+          folder._reset();
+          folder.addEventListener("rise-storage-error", errorSpy);
+        });
+
+        teardown(function(){
+          fileBucket.removeEventListener("rise-storage-error", errorSpy);
+          folder.removeEventListener("rise-storage-error", errorSpy);
+        });
+
+        test("should fire rise-storage-error if Rise Cache is not running", function() {
           fileBucket._handleStorageError({}, resp);
-          assert.isTrue(responded);
-          done();
+          assert(errorSpy.calledOnce);
+        });
+
+        test("should fire rise-storage-error if Rise Cache is running but file previously determined to be throttled", function() {
+          fileBucket._isCacheRunning = true;
+          fileBucket._isLoading = false;
+          fileBucket._fileThrottled = true;
+
+          fileBucket._handleStorageError({}, resp);
+          assert(errorSpy.calledOnce);
+        });
+
+        test("should fire rise-storage-error if Rise Cache is running but no previous folder files to request", function() {
+          fileBucket._isCacheRunning = true;
+          fileBucket._isLoading = false;
+          fileBucket._isFile = false;
+
+          fileBucket._handleStorageError({}, resp);
+          assert(errorSpy.calledOnce);
+        });
+
+        test("should bypass firing error and proceed with getting file from Rise Cache", function() {
+          var getFileStub = sinon.stub(fileBucket, "_getFileFromCache", function(){});
+
+          fileBucket._isCacheRunning = true;
+          fileBucket._isLoading = false;
+          fileBucket._isFile = true;
+
+          fileBucket._handleStorageError({}, resp);
+          assert(getFileStub.calledOnce);
+          assert(errorSpy.notCalled);
+
+          fileBucket._getFileFromCache.restore();
+        });
+
+        test("should bypass firing error and proceed with getting folder files from Rise Cache", function() {
+          var requestFolderStub = sinon.stub(folder, "_requestCacheFolderFile", function(){});
+
+          folder._isCacheRunning = true;
+          folder._isLoading = false;
+          folder._isFile = false;
+          folder._folderFilesToRequest = ["", "", ""];
+
+          folder._handleStorageError({}, resp);
+          assert(requestFolderStub.calledOnce);
+          assert(errorSpy.notCalled);
+
+          folder._requestCacheFolderFile.restore();
         });
       });
 
