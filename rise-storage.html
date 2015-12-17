@@ -232,15 +232,6 @@
     _totalFiles: 0,
 
     /**
-     * The total number of files in a folder from the last request.
-     *
-     * @property _totalFilesBefore
-     * @type number
-     * @default 0
-     */
-    _totalFilesBefore: 0,
-
-    /**
      * The list of items in a folder to request from Rise Cache.
      *
      * @property _folderFilesToRequest
@@ -257,15 +248,6 @@
      * @default []
      */
     _folderFilesRequested: 0,
-
-    /**
-     * Whether or not any of the files in a folder have changed.
-     *
-     * @property _isChanged
-     * @type boolean
-     * @default false
-     */
-    _isChanged: false,
 
     /**
      * Whether or not a file is throttled.
@@ -694,8 +676,6 @@
 
       if (resp.files) {
         this._numFiles = 0;
-        this._isChanged = false;
-        this._totalFilesBefore = this._totalFiles;
 
         // Only count actual files (ignore folders)
         this._totalFiles = resp.files.filter(function(item) {
@@ -871,7 +851,6 @@
             else {
               previousItem.lastModified = lastModified;
               previousItem.fullUrl = file.url;
-              this._isChanged = true;
               file.changed = true;
             }
           }
@@ -887,12 +866,6 @@
       this._numFiles++;
 
       if (this._numFiles === this._totalFiles) {
-        // If number of files in the folder has changed, then file(s) have either been added
-        // or removed.
-        if (this._totalFiles !== this._totalFilesBefore) {
-          this._isChanged = true;
-        }
-
         this._startTimer();
         this._isLoading = false;
       }
@@ -1267,8 +1240,6 @@
       this._pingReceived = false;
       this._numFiles = 0;
       this._totalFiles = 0;
-      this._totalFilesBefore = 0;
-      this._isChanged = false;
       this._cacheRequestMethod = "HEAD";
       this._hasAttemptedGetRequest = false;
       this._folderFilesToRequest = [];
