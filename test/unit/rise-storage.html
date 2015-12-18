@@ -187,8 +187,12 @@
         suite("bucket file", function() {
           var url = bucketImage.files[0].selfLink;
 
-          setup(function() {
+          suiteSetup(function () {
             fileBucket._reset();
+          });
+
+          teardown(function () {
+            fileBucket.removeEventListener("rise-storage-response", listener);
           });
 
           test("should return the correct URL for a specific file in a bucket", function(done) {
@@ -196,7 +200,6 @@
               responded = true;
               assert.equal(response.detail.name, "home.jpg");
               assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg?alt=media");
-              fileBucket.removeEventListener("rise-storage-response", listener);
             };
 
             fileBucket.addEventListener("rise-storage-response", listener);
@@ -207,31 +210,29 @@
             done();
           });
 
-          test("should not fire rise-storage-response if the file hasn't changed", function(done) {
+          test("should fire rise-storage-response if the file hasn't changed", function(done) {
             listener = function(response) {
               responded = true;
+              assert.isFalse(response.detail.changed);
+              fileBucket.removeEventListener("rise-storage-response", listener);
             };
 
-            fileBucket._fileUrl = url + suffix;
-            fileBucket._handleStorageFile(bucketImage);
             fileBucket.addEventListener("rise-storage-response", listener);
             fileBucket._handleStorageFile(bucketImage);
-            fileBucket.removeEventListener("rise-storage-response", listener);
 
-            assert.isFalse(responded);
+            assert.isTrue(responded);
             done();
           });
 
           test("should return a new URL if the file has changed", function(done) {
             listener = function(response) {
               responded = true;
+              assert.isTrue(response.detail.changed);
               assert.equal(response.detail.name, "home.jpg");
               assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg?alt=media&cb=0");
               fileBucket.removeEventListener("rise-storage-response", listener);
             };
 
-            fileBucket._fileUrl = url + suffix;
-            fileBucket._handleStorageFile(bucketImage);
             bucketImage.files[0].etag = "new";
             fileBucket.addEventListener("rise-storage-response", listener);
             fileBucket._handleStorageFile(bucketImage);
@@ -247,8 +248,12 @@
         suite("folder file", function() {
           var url = folderImage.files[0].selfLink;
 
-          setup(function() {
+          suiteSetup(function () {
             fileFolder._reset();
+          });
+
+          teardown(function() {
+            fileFolder.removeEventListener("rise-storage-response", listener);
           });
 
           test("should return the correct URL for a specific file in a bucket", function(done) {
@@ -256,7 +261,6 @@
               responded = true;
               assert.equal(response.detail.name, "images/home.jpg");
               assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media");
-              fileFolder.removeEventListener("rise-storage-response", listener);
             };
 
             fileFolder.addEventListener("rise-storage-response", listener);
@@ -267,31 +271,27 @@
             done();
           });
 
-          test("should not fire rise-storage-response if the file hasn't changed", function(done) {
+          test("should fire rise-storage-response if the file hasn't changed", function(done) {
             listener = function(response) {
               responded = true;
+              assert.isFalse(response.detail.changed);
             };
 
-            fileFolder._fileUrl = url + suffix;
-            fileFolder._handleStorageFile(folderImage);
             fileFolder.addEventListener("rise-storage-response", listener);
             fileFolder._handleStorageFile(folderImage);
-            fileFolder.removeEventListener("rise-storage-response", listener);
 
-            assert.isFalse(responded);
+            assert.isTrue(responded);
             done();
           });
 
           test("should return a new URL if the file has changed", function(done) {
             listener = function(response) {
               responded = true;
+              assert.isTrue(response.detail.changed);
               assert.equal(response.detail.name, "images/home.jpg");
               assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media&cb=0");
-              fileFolder.removeEventListener("rise-storage-response", listener);
             };
 
-            fileFolder._fileUrl = url + suffix;
-            fileFolder._handleStorageFile(folderImage);
             folderImage.files[0].etag = "new";
             fileFolder.addEventListener("rise-storage-response", listener);
             fileFolder._handleStorageFile(folderImage);
@@ -308,7 +308,7 @@
       suite("_handleStorageFolder", function() {
         var localImages;
 
-        setup(function() {
+        suiteSetup(function () {
           folder._reset();
           localImages = JSON.parse(JSON.stringify(images));
         });
@@ -331,7 +331,6 @@
               assert.equal(files[0].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media");
               assert.equal(files[1].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media");
               assert.equal(files[2].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fmy-image.bmp?alt=media");
-              folder.removeEventListener("rise-storage-response", listener);
             }
           };
 
@@ -356,7 +355,6 @@
               assert.equal(files[0].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media");
               assert.equal(files[1].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media");
               assert.equal(files[2].url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fmy-image.bmp?alt=media");
-              folder.removeEventListener("rise-storage-response", listener);
             }
           };
 
@@ -369,14 +367,12 @@
 
         test("should return new URL if a file has changed", function(done) {
           listener = function(response) {
-            responded = true;
-            assert.equal(response.detail.name, "images/circle.png");
-            assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media&cb=0");
-            assert.isTrue(response.detail.changed);
-            folder.removeEventListener("rise-storage-response", listener);
+            if (response.detail.changed) {
+              responded = true;
+              assert.equal(response.detail.name, "images/circle.png");
+              assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media&cb=0");
+            }
           };
-
-          folder._handleStorageFolder(images);
 
           images.files[2].etag = "new";
           folder.addEventListener("rise-storage-response", listener);
@@ -388,14 +384,12 @@
 
         test("should return URL of a file that has been added to a folder", function(done) {
           listener = function(response) {
-            responded = true;
-            assert.equal(response.detail.name, "images/golf.svg");
-            assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fgolf.svg?alt=media&cb=0");
-            assert.isTrue(response.detail.added);
-            folder.removeEventListener("rise-storage-response", listener);
+            if (response.detail.added) {
+              responded = true;
+              assert.equal(response.detail.name, "images/golf.svg");
+              assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fgolf.svg?alt=media&cb=0");
+            }
           };
-
-          folder._handleStorageFolder(images);
 
           images.files.push({
             "name": "images/golf.svg",
@@ -412,15 +406,14 @@
           done();
         });
 
-        test("should not return URL of a file that has been removed from a folder", function(done) {
-          var listener = function(response) {
-            responded = true;
-            assert.equal(response.detail.name, "images/my-image.bmp");
-            assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fmy-image.bmp?alt=media");
-            folder.removeEventListener("rise-storage-response", listener);
+        test("should return URL of a file that has been removed from a folder", function(done) {
+          listener = function(response) {
+            if (response.detail.deleted) {
+              responded = true;
+              assert.equal(response.detail.name, "images/golf.svg");
+              assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fgolf.svg?alt=media&cb=0");
+            }
           };
-
-          folder._handleStorageFolder(images);
 
           images.files.pop();
           folder.addEventListener("rise-storage-response", listener);
@@ -509,7 +502,7 @@
           assert.equal(fileBucket._isThrottled(resp, 0), false);
         });
 
-        test("should return false if file has no isThrottled property", function() {debugger;
+        test("should return false if file has no isThrottled property", function() {
           resp.files = [{}];
 
           assert.equal(fileBucket._isThrottled(resp, 0), false);
