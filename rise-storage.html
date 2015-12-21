@@ -495,9 +495,7 @@
       else {
         // File hasn't changed.
         if (this._files[0].etag === etag) {
-          this._startTimer();
-
-          return;
+          file.changed = false;
         }
         else {
           this._files[0].etag = etag;
@@ -611,7 +609,7 @@
                       file.url = previousItem.url;
                     }
 
-                    file.unchanged = true;
+                    file.changed = false;
                   }
                   // File has changed.
                   else {
@@ -627,11 +625,9 @@
                 delete file.sortBy;
               }
 
-              if (!file.unchanged) {
-                file.name = self._getFileNameFromUrl(file.url);
+              file.name = self._getFileNameFromUrl(file.url);
 
-                self.fire("rise-storage-response", file);
-              }
+              self.fire("rise-storage-response", file);
             }
           }
         });
@@ -765,14 +761,10 @@
         else {
           // Rise Cache file hasn't changed.
           if (this._files[0].lastModified === lastModified) {
-            file.unchanged = true;
-            this._startTimer();
-
-            return;
+            file.changed = false;
           }
           else {
             this._files[0].lastModified = lastModified;
-            this.changed = true;
             file.changed = true;
           }
         }
@@ -845,7 +837,7 @@
             if (lastModified === previousItem.lastModified) {
               // Use the same URL as before in order to leverage browser caching.
               file.url = previousItem.fullUrl;
-              file.unchanged = true;
+              file.changed = false;
             }
             // File has changed.
             else {
@@ -856,11 +848,9 @@
           }
         }
 
-        if(!file.unchanged) {
-          file.name = this._getFileNameFromUrl(file.url);
+        file.name = this._getFileNameFromUrl(file.url);
 
-          this.fire("rise-storage-response", file);
-        }
+        this.fire("rise-storage-response", file);
       }
 
       this._numFiles++;
