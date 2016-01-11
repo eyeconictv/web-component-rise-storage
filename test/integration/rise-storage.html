@@ -82,11 +82,11 @@
           server.respond();
         });
 
-        test("should return a URL if the file has changed", function(done) {
+        test("should return a new URL if the file has changed", function(done) {
           responseHandler = function(response) {
             assert.isTrue(response.detail.changed);
             assert.equal(response.detail.name, "home.jpg");
-            assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg?alt=media");
+            assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg?alt=media&cb=0");
             done();
           };
 
@@ -140,10 +140,10 @@
           server.respond();
         });
 
-        test("should return a URL if the file has changed", function(done) {
+        test("should return a new URL if the file has changed", function(done) {
           responseHandler = function(response) {
             assert.isTrue(response.detail.changed);
-            assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media");
+            assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fhome.jpg?alt=media&cb=0");
             done();
           };
 
@@ -213,11 +213,11 @@
           server.respond();
         });
 
-        test("should return a URL if a file has changed", function(done) {
+        test("should return a new URL if a file has changed", function(done) {
           responseHandler = function(response) {
             if (response.detail.changed) {
               assert.equal(response.detail.name, "images/circle.png");
-              assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media");
+              assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fcircle.png?alt=media&cb=0");
               done();
             }
           };
@@ -238,7 +238,7 @@
 
             if (response.detail.added && count > 3) {
               assert.equal(response.detail.name, "images/golf.svg");
-              assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fgolf.svg?alt=media");
+              assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fgolf.svg?alt=media&cb=0");
               done();
             }
           };
@@ -261,7 +261,7 @@
           responseHandler = function(response) {
             if (response.detail.deleted) {
               assert.equal(response.detail.name, "images/golf.svg");
-              assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fgolf.svg?alt=media");
+              assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/images%2Fgolf.svg?alt=media&cb=0");
               done();
             }
           };
