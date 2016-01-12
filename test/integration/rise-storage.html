@@ -16,6 +16,7 @@
   <rise-storage id="file-folder" companyId="abc123" folder="images" fileName="home.jpg" refresh="5"></rise-storage>
   <rise-storage id="file-type" companyId="abc123" folder="my-folder" fileType="image"></rise-storage>
   <rise-storage id="content-type" companyId="abc123" folder="my-folder" contentType="image/jpeg image/bmp"></rise-storage>
+  <rise-storage id="folder-invalid" companyId="abc123" folder="images" fileType="video"></rise-storage>
 
   <script src="../js/rise-storage-data.js"></script>
   <script>
@@ -27,6 +28,7 @@
         file = document.querySelector("#file"),
         fileFolder = document.querySelector("#file-folder"),
         fileType = document.querySelector("#file-type"),
+        invalidFolder = document.querySelector("#folder-invalid"),
         contentType = document.querySelector("#content-type"),
         cacheHeader = { "Last-Modified": "Fri, 01 May 2015 15:32:11 GMT" };
 
@@ -591,6 +593,44 @@
           folder.addEventListener("rise-storage-file-throttled", responseHandler);
           server.respondWith([200, header, JSON.stringify(images)]);
           folder.go();
+          server.respond();
+
+          assert(responseHandler.notCalled);
+          done();
+        });
+      });
+
+      suite("rise-storage-folder-invalid", function() {
+        setup(function() {
+          invalidFolder._reset();
+          invalidFolder._isCacheRunning = false;
+          invalidFolder._pingReceived = true;
+        });
+
+        teardown(function() {
+          invalidFolder.removeEventListener("rise-storage-folder-invalid", responseHandler);
+        });
+
+        test("should fire rise-storage-folder-invalid if no valid files exist in folder", function(done) {
+          responseHandler = function(response) {
+            assert.isObject(response.detail, "response.detail is an object");
+            assert.deepEqual(response.detail, {}, "response.detail is an empty object");
+
+            done();
+          };
+
+          invalidFolder.addEventListener("rise-storage-folder-invalid", responseHandler);
+          server.respondWith([200, header, JSON.stringify(images)]);
+          invalidFolder.go();
+          server.respond();
+        });
+
+        test("should not fire rise-storage-folder-invalid if folder does contain a valid file format", function(done) {
+          responseHandler = sinon.spy();
+
+          invalidFolder.addEventListener("rise-storage-folder-invalid", responseHandler);
+          server.respondWith([200, header, JSON.stringify(mixedMedia)]);
+          invalidFolder.go();
           server.respond();
 
           assert(responseHandler.notCalled);

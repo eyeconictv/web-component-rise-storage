@@ -18,6 +18,7 @@
   <rise-storage id="file-folder" companyId="abc123" folder="images" fileName="home.jpg"></rise-storage>
   <rise-storage id="file-bucket" companyId="abc123" fileName="home.jpg"></rise-storage>
   <rise-storage id="content-type" companyId="abc123" folder="images" contentType="image/jpeg image/png"></rise-storage>
+  <rise-storage id="invalid-folder" companyId="abc123" folder="images" fileType="video"></rise-storage>
 
   <script src="../js/rise-storage-data.js"></script>
   <script>
@@ -28,6 +29,7 @@
         noCompany = document.querySelector("#noCompany"),
         bucket = document.querySelector("#bucket"),
         folder = document.querySelector("#folder"),
+        invalidFolder = document.querySelector("#invalid-folder"),
         folderTesting = document.querySelector("#folder-testing"),
         fileFolder = document.querySelector("#file-folder"),
         fileBucket = document.querySelector("#file-bucket"),
@@ -310,6 +312,7 @@
 
         suiteSetup(function () {
           folder._reset();
+          invalidFolder._reset();
           localImages = JSON.parse(JSON.stringify(images));
         });
 
@@ -422,6 +425,15 @@
           assert.isTrue(responded);
           images.files[2].etag = "CMiEudSn2MMCEAs=";
           done();
+        });
+
+        test("should fire rise-storage-folder-invalid if no valid files exist in folder", function() {
+          var errorSpy = sinon.spy();
+
+          invalidFolder.addEventListener("rise-storage-folder-invalid", errorSpy);
+          invalidFolder._handleStorageFolder(images);
+
+          assert(errorSpy.calledOnce);
         });
       });
 

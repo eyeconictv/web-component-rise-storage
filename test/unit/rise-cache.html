@@ -13,6 +13,7 @@
 <body>
   <rise-storage id="cache-folder" companyId="abc123" folder="images"></rise-storage>
   <rise-storage id="cache-file" companyId="abc123" fileName="home.jpg"></rise-storage>
+  <rise-storage id="cache-folder-invalid" companyId="abc123" folder="images" fileType="video"></rise-storage>
 
   <script src="../js/rise-storage-data.js"></script>
   <script>
@@ -22,6 +23,7 @@
         clock,
         cacheFolder = document.querySelector("#cache-folder"),
         cacheFile = document.querySelector("#cache-file"),
+        invalidFolder = document.querySelector("#cache-folder-invalid"),
         suffix = "?alt=media";
 
       suiteSetup(function() {
@@ -209,6 +211,15 @@
         test("should correctly request for first item in folder file list", function () {
           cacheFolder._getFilesFromCache(images);
           assert(spy.calledWith(images.files[1]));
+        });
+
+        test("should fire rise-storage-folder-invalid if no valid files exist in folder", function() {
+          var errorSpy = sinon.spy();
+
+          invalidFolder.addEventListener("rise-storage-folder-invalid", errorSpy);
+          invalidFolder._handleStorageFolder(images);
+
+          assert(errorSpy.calledOnce);
         });
 
       });
