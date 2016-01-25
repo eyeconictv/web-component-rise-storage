@@ -56,7 +56,7 @@
         test("should return the correct URL for a specific file in a bucket", function(done) {
           responseHandler = function(response) {
             assert.equal(response.detail.name, "home.jpg");
-            assert.equal(response.detail.url, "http://localhost:9494/?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fhome.jpg");
+            assert.equal(response.detail.url, "//localhost:9494/?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fhome.jpg");
             done();
           };
 
@@ -82,7 +82,7 @@
           responseHandler = function(response) {
             assert.isTrue(response.detail.changed);
             assert.equal(response.detail.name, "home.jpg");
-            assert.equal(response.detail.url, "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fhome.jpg");
+            assert.equal(response.detail.url, "//localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fhome.jpg");
             done();
           };
 
@@ -109,7 +109,7 @@
           responseHandler = function(response) {
             assert.isTrue(response.detail.added);
             assert.equal(response.detail.name, "images/home.jpg");
-            assert.equal(response.detail.url, "http://localhost:9494/?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg");
+            assert.equal(response.detail.url, "//localhost:9494/?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg");
             done();
           };
 
@@ -135,7 +135,7 @@
           responseHandler = function(response) {
             assert.isTrue(response.detail.changed);
             assert.equal(response.detail.name, "images/home.jpg");
-            assert.equal(response.detail.url, "http://localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg");
+            assert.equal(response.detail.url, "//localhost:9494/cb=0?url=https%3A%2F%2Fstorage.googleapis.com%2Frisemedialibrary-abc123%2Fimages%252Fhome.jpg");
             done();
           };
 
