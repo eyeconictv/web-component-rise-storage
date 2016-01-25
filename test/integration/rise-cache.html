@@ -15,6 +15,8 @@
   <rise-storage id="cache-file-folder" companyId="abc123" folder="images" fileName="home.jpg" refresh="5"></rise-storage>
 
   <script src="../js/rise-storage-data.js"></script>
+  <script src="../js/rise-storage-subscription-date.js"></script>
+
   <script>
     suite("rise-storage", function() {
       var clock,
@@ -32,6 +34,9 @@
         // Send a response to the ping request.
         server.respondWith("GET", "http://localhost:9494/ping?callback=_handlePingResponse",
           [200, cacheHeader, ""]);
+
+        server.respondWith("GET", "https://store-dot-rvaserver2.appspot.com/v1/company/abc123/product/status?pc=b0cba08a4baa0c62b8cdc621b6f6a124f89a03db",
+          [200, header, JSON.stringify(subscribedStatus)]);
 
         clock = sinon.useFakeTimers();
       });
