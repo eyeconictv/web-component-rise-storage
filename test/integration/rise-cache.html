@@ -15,6 +15,8 @@
   <rise-storage id="cache-file-folder" companyId="abc123" folder="images" fileName="home.jpg" refresh="5"></rise-storage>
 
   <script src="../js/rise-storage-data.js"></script>
+  <script src="../js/rise-storage-subscription-date.js"></script>
+
   <script>
     suite("rise-storage", function() {
       var clock,
@@ -25,19 +27,20 @@
         cacheHeader = { "Last-Modified": "Fri, 01 May 2015 15:32:11 GMT" },
         newCacheHeader = { "Last-Modified": "Fri, 24 Apr 2015 15:32:11 GMT" };
 
-      // Runs for every suite.
-      suiteSetup(function() {
+      // Runs for every test
+      setup(function () {
         server = sinon.fakeServer.create();
-
-        // Send a response to the ping request.
+        server.respondImmediately = true;
         server.respondWith("GET", "http://localhost:9494/ping?callback=_handlePingResponse",
           [200, cacheHeader, ""]);
+        server.respondWith("GET", "https://store-dot-rvaserver2.appspot.com/v1/company/abc123/product/status?pc=b0cba08a4baa0c62b8cdc621b6f6a124f89a03db",
+          [200, header, JSON.stringify(subscribedStatus)]);
 
         clock = sinon.useFakeTimers();
       });
 
-      suiteTeardown(function() {
-        server.restore()
+      teardown(function () {
+        server.restore();
         clock.restore();
       });
 
@@ -63,7 +66,6 @@
           cacheFile.addEventListener("rise-storage-response", responseHandler);
           server.respondWith([200, cacheHeader, ""]);
           cacheFile._getFileFromCache();
-          server.respond();
         });
 
         test("should fire rise-storage-response even if the file hasn't changed", function(done) {
@@ -75,7 +77,6 @@
           cacheFile.addEventListener("rise-storage-response", responseHandler);
           server.respondWith([200, cacheHeader, ""]);
           cacheFile._getFileFromCache();
-          server.respond();
         });
 
         test("should return a new URL if the file has changed", function(done) {
@@ -89,7 +90,6 @@
           cacheFile.addEventListener("rise-storage-response", responseHandler);
           server.respondWith([200, newCacheHeader, ""]);
           cacheFile._getFileFromCache();
-          server.respond();
         });
       });
 
@@ -116,7 +116,6 @@
           server.respondWith([200, cacheHeader, ""]);
           cacheFileFolder.addEventListener("rise-storage-response", responseHandler);
           cacheFileFolder._getFileFromCache();
-          server.respond();
         });
 
         test("should fire rise-storage-response even if the file hasn't changed", function(done) {
@@ -128,7 +127,6 @@
           cacheFileFolder.addEventListener("rise-storage-response", responseHandler);
           server.respondWith([200, cacheHeader, ""]);
           cacheFileFolder._getFileFromCache();
-          server.respond();
         });
 
         test("should return a new URL if the file has changed", function(done) {
@@ -142,7 +140,6 @@
           cacheFileFolder.addEventListener("rise-storage-response", responseHandler);
           server.respondWith([200, newCacheHeader, ""]);
           cacheFileFolder._getFileFromCache();
-          server.respond();
         });
       });
 
@@ -151,10 +148,12 @@
 
         suiteSetup(function() {
           folderImage.files[0].isThrottled = true;
+          sinon.stub(cacheFileFolder, "_handlePingResponse");
         });
 
         suiteTeardown(function() {
           folderImage.files[0].isThrottled = false;
+          cacheFileFolder._handlePingResponse.restore();
         });
 
         test("should make a request to Storage after 5 minutes to check if a file is still throttled", function(done) {
@@ -174,7 +173,6 @@
           cacheFileFolder.addEventListener("rise-storage-file-throttled", responseHandler);
           server.respondWith([200, header, JSON.stringify(folderImage)]);
           cacheFileFolder.go();
-          server.respond();
         });
 
       });
