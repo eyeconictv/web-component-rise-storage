@@ -290,6 +290,39 @@
         });
       });
 
+      suite("rise-storage-api-error", function() {
+        setup(function() {
+          file._reset();
+          file._isCacheRunning = false;
+          file._pingReceived = true;
+        });
+
+        test("should fire rise-storage-api-error if storage response indicates an error", function(done) {
+          responseHandler = function(response) {
+            assert.isObject(response.detail, "response.detail is a response object");
+
+            file.removeEventListener("rise-storage-api-error", responseHandler);
+
+            done();
+          };
+
+          file.addEventListener("rise-storage-api-error", responseHandler);
+          server.respondWith([200, header, JSON.stringify(apiError)]);
+          file.go();
+        });
+
+        test("should not fire rise-storage-api-error if storage response doesn't indicate an error", function(done) {
+          responseHandler = sinon.spy();
+
+          file.addEventListener("rise-storage-api-error", responseHandler);
+          server.respondWith([200, header, JSON.stringify(bucketImage)]);
+          file.go();
+
+          assert(responseHandler.notCalled);
+          done();
+        });
+      });
+
       suite("rise-storage-empty-folder", function() {
         setup(function() {
           folder._reset();

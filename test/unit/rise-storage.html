@@ -539,6 +539,16 @@
           assert.equal(folder._isFile, false);
         });
       });
+
+      suite("_isAPIError", function() {
+        test("should return true for an api error response", function() {
+          assert.isTrue(fileBucket._isAPIError(apiError));
+        });
+
+        test("should return false when not an api error response", function() {
+          assert.isFalse(fileBucket._isAPIError(bucketImage));
+        });
+      });
     });
   </script>
 </body>

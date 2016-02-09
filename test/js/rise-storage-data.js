@@ -1,5 +1,7 @@
 var header = { "Content-Type": "text/json" },
   images = {
+    "result": true,
+    "code": 200,
     "files": [{
       "name": "images/",
       "contentType": "text/plain",
@@ -34,6 +36,8 @@ var header = { "Content-Type": "text/json" },
     }]
   },
   mixedMedia = {
+    "result": true,
+    "code": 200,
     "files": [{
       "name": "images/",
       "contentType": "text/plain",
@@ -108,6 +112,8 @@ var header = { "Content-Type": "text/json" },
     }]
   },
   folderImage = {
+    "result": true,
+    "code": 200,
     "files": [{
       "name": "images/home.jpg",
       "contentType": "image/jpeg",
@@ -203,5 +209,10 @@ var header = { "Content-Type": "text/json" },
     "bucketExists": true,
     "kind": "storage#filesItem",
     "etag": "\"-xn2BkoYzbrr0EhwVLI1-3fTi7c/1Ev8FzsCppGm6uDNrJyFySGIKrI\""
+  },
+  apiError = {
+    "result": false,
+    "code": 500,
+    "message": "Could not retrieve Bucket Items"
   },
   xhr, requests;

@@ -141,6 +141,8 @@
 
         test("should send a rise-storage-response event after receiving a response updated notification", function(done) {
           var storageResponse = {
+            result: true,
+            code: 200,
             files: [{
               name: "images/image.jpg",
               selfLink: "https://storage.googleapis.com/risemedialibrary-abc123/images%2Fimage.jpg",
