@@ -12,7 +12,7 @@
 </head>
 <body>
   <rise-storage id="folder" companyId="abc123" folder="images"></rise-storage>
-  <rise-storage id="file" companyId="abc123" fileName="home.jpg"></rise-storage>
+  <rise-storage id="file" companyId="abc123" fileName="home.jpg" refresh="5"></rise-storage>
   <rise-storage id="file-folder" companyId="abc123" folder="images" fileName="home.jpg" refresh="5"></rise-storage>
   <rise-storage id="file-type" companyId="abc123" folder="my-folder" fileType="image"></rise-storage>
   <rise-storage id="content-type" companyId="abc123" folder="my-folder" contentType="image/jpeg image/bmp"></rise-storage>
@@ -297,11 +297,13 @@
           file._pingReceived = true;
         });
 
+        teardown(function() {
+          file.removeEventListener("rise-storage-api-error", responseHandler);
+        });
+
         test("should fire rise-storage-api-error if storage response indicates an error", function(done) {
           responseHandler = function(response) {
             assert.isObject(response.detail, "response.detail is a response object");
-
-            file.removeEventListener("rise-storage-api-error", responseHandler);
 
             done();
           };
@@ -321,6 +323,26 @@
           assert(responseHandler.notCalled);
           done();
         });
+
+        test("should retry storage request after rise-storage-api-error is encountered", function(done) {
+          var timerSpy;
+
+          responseHandler = function(response) {
+            timerSpy = sinon.spy(file, "_loadStorage");
+
+            clock.tick(299999);
+            assert(timerSpy.notCalled);
+            clock.tick(300000);
+            assert(timerSpy.calledOnce);
+
+            done();
+          };
+
+          file.addEventListener("rise-storage-api-error", responseHandler);
+          server.respondWith([200, header, JSON.stringify(apiError)]);
+          file.go();
+        });
+
       });
 
       suite("rise-storage-empty-folder", function() {
