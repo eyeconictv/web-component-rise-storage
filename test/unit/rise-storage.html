@@ -132,7 +132,15 @@
           folder.removeEventListener("rise-storage-error", errorSpy);
         });
 
+        test("should retry storage request if the first request fails", function() {
+          var loadStorageStub = sinon.stub(fileBucket, "_loadStorage", function(){});
+
+          fileBucket._handleStorageError({}, resp);
+          assert(loadStorageStub.calledOnce);
+        });
+
         test("should fire rise-storage-error if Rise Cache is not running", function() {
+          fileBucket._hasAttemptedSecondStorageRequest = true;
           fileBucket._handleStorageError({}, resp);
           assert(errorSpy.calledOnce);
         });
@@ -141,6 +149,7 @@
           fileBucket._isCacheRunning = true;
           fileBucket._isLoading = false;
           fileBucket._fileThrottled = true;
+          fileBucket._hasAttemptedSecondStorageRequest = true;
 
           fileBucket._handleStorageError({}, resp);
           assert(errorSpy.calledOnce);
@@ -150,6 +159,7 @@
           fileBucket._isCacheRunning = true;
           fileBucket._isLoading = false;
           fileBucket._isFile = false;
+          fileBucket._hasAttemptedSecondStorageRequest = true;
 
           fileBucket._handleStorageError({}, resp);
           assert(errorSpy.calledOnce);
@@ -161,6 +171,7 @@
           fileBucket._isCacheRunning = true;
           fileBucket._isLoading = false;
           fileBucket._isFile = true;
+          fileBucket._hasAttemptedSecondStorageRequest = true;
 
           fileBucket._handleStorageError({}, resp);
           assert(getFileStub.calledOnce);
@@ -176,6 +187,7 @@
           folder._isLoading = false;
           folder._isFile = false;
           folder._folderFilesToRequest = ["", "", ""];
+          folder._hasAttemptedSecondStorageRequest = true;
 
           folder._handleStorageError({}, resp);
           assert(requestFolderStub.calledOnce);
@@ -547,6 +559,20 @@
 
         test("should return false when not an api error response", function() {
           assert.isFalse(fileBucket._isAPIError(bucketImage));
+        });
+
+        test("should retry request when there is an api error response on the first request", function() {
+          var resp = {
+            "response" : {
+              "result": false,
+              "code": 500,
+              "message": "Could not retrieve Bucket Items"
+            }
+          }
+          var handleStorageErrorWithRetryStub = sinon.stub(fileBucket, "_handleStorageErrorWithRetry", function(){});
+
+          fileBucket._processStorageResponse({},resp);
+          assert(handleStorageErrorWithRetryStub.calledOnce);
         });
       });
     });
