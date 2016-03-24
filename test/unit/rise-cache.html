@@ -311,10 +311,19 @@
       });
 
       suite("_handlePingResponse", function() {
-        test("should correctly set _isCacheRunning and _pingReceived if ping response is an empty string", function() {
+        test("should correctly set _isCacheRunning and _pingReceived if ping response is an empty string", function(done) {
+
+          var listener = function() {
+            responded = true;
+            cacheFile.removeEventListener("rise-cache-not-running", listener);
+          };
+          cacheFile.addEventListener("rise-cache-not-running", listener);
+
           cacheFile._handlePingResponse({}, { "response": "" });
           assert.equal(cacheFile._isCacheRunning, false);
           assert.equal(cacheFile._pingReceived, true);
+          assert.isTrue(responded);
+          done();
         });
 
         test("should correctly set _isCacheRunning and _pingReceived if ping response is not an empty string", function() {
@@ -325,17 +334,24 @@
       });
 
       suite("_handlePingError", function() {
-        test("should correctly set _isCacheRunning and _pingReceived if a ping error occurs", function() {
+        test("should correctly set _isCacheRunning and _pingReceived if a ping error occurs", function(done) {
           var resp = {
             "xhr": {
               "status": 404,
               "statusText": "An error occurred"
             }
+          },
+          listener = function() {
+            responded = true;
+            cacheFile.removeEventListener("rise-cache-not-running", listener);
           };
+          cacheFile.addEventListener("rise-cache-not-running", listener);
 
           cacheFile._handlePingError({}, resp);
           assert.equal(cacheFile._isCacheRunning, false);
           assert.equal(cacheFile._pingReceived, true);
+          assert.isTrue(responded);
+          done();
         });
       });
 

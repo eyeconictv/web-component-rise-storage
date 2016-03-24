@@ -113,16 +113,19 @@ The web component returns a JSON response for each file matching the provided cr
 | `isCacheRunning` | `<boolean>` Whether or not Rise Cache is running. | `false` |
 
 ### Events
-| Event                         | Description                                                         |
-| ----------------------------- | ------------------------------------------------------------------- |
-| `rise-storage-response`       | Fired when a response is received.                                  |
-| `rise-storage-error`          | Fired when an error is received.                                    |
-| `rise-storage-empty-folder`   | Fired when the request is for a folder that is empty.               |
-| `rise-storage-no-folder`      | Fired when the request is for a folder that does not exist.         |
-| `rise-storage-no-file`        | Fired when the request is for a file that does not exist.           |
-| `rise-storage-file-throttled` | Fired when the request is for a file that has been throttled.
-| `rise-storage-folder-invalid` | Fired when the request is for a folder that only contains files of the wrong file type format.
-| `rise-storage-api-error`      | Fired when the request returns a response indicating an error with the Storage API.     
+| Event                         | Description                                                                                   |
+| ----------------------------- | --------------------------------------------------------------------------------------------- |
+| `rise-storage-response`       | Fired when a response is received.                                                            |
+| `rise-storage-error`          | Fired when an error is received.                                                              |
+| `rise-storage-empty-folder`   | Fired when the request is for a folder that is empty.                                         |
+| `rise-storage-no-folder`      | Fired when the request is for a folder that does not exist.                                   |
+| `rise-storage-no-file`        | Fired when the request is for a file that does not exist.                                     |
+| `rise-storage-file-throttled` | Fired when the request is for a file that has been throttled.                                 |
+| `rise-storage-folder-invalid` | Fired when the request is for a folder that only contains files of the wrong file type format.|
+| `rise-storage-api-error`      | Fired when the request returns a response indicating an error with the Storage API.           |
+| `rise-cache-error`            | Fired when an error is received from cache.                                                   |
+| `rise-cache-not-running`      | Fired when rise cache is not running.                                                         |
+
 
 
 ### Methods
