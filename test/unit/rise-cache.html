@@ -371,7 +371,7 @@
         });
 
         test("should check for changes to a file", function() {
-          timerSpy = sinon.spy(cacheFile.$.storage, "generateRequest");
+          timerSpy = sinon.spy(cacheFile.$.ping, "generateRequest");
 
           cacheFile.refresh = 5;
           cacheFile._startTimer();
@@ -381,7 +381,7 @@
         });
 
         test("should check for changes to a folder", function() {
-          timerSpy = sinon.spy(cacheFolder.$.storage, "generateRequest");
+          timerSpy = sinon.spy(cacheFolder.$.ping, "generateRequest");
 
           cacheFolder._isFile = false;
           cacheFolder._startTimer();

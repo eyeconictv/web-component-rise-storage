@@ -32,7 +32,7 @@
         server = sinon.fakeServer.create();
         server.respondImmediately = true;
         server.respondWith("GET", "http://localhost:9494/ping?callback=_handlePingResponse",
-          [200, cacheHeader, ""]);
+          [200, cacheHeader, "running"]);
         server.respondWith("GET", "https://store-dot-rvaserver2.appspot.com/v1/company/abc123/product/status?pc=b0cba08a4baa0c62b8cdc621b6f6a124f89a03db",
           [200, header, JSON.stringify(subscribedStatus)]);
 
@@ -148,17 +148,15 @@
 
         suiteSetup(function() {
           folderImage.files[0].isThrottled = true;
-          sinon.stub(cacheFileFolder, "_handlePingResponse");
         });
 
         suiteTeardown(function() {
           folderImage.files[0].isThrottled = false;
-          cacheFileFolder._handlePingResponse.restore();
         });
 
         test("should make a request to Storage after 5 minutes to check if a file is still throttled", function(done) {
           responseHandler = function(response) {
-            timerSpy = sinon.spy(cacheFileFolder, "_loadStorage");
+            timerSpy = sinon.spy(cacheFileFolder.$.ping, "generateRequest");
 
             clock.tick(299999);
             assert(timerSpy.notCalled);
@@ -176,6 +174,8 @@
         });
 
       });
+
+
     });
   </script>
 </body>

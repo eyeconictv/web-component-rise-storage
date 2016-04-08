@@ -328,7 +328,7 @@
           var timerSpy;
 
           responseHandler = function(response) {
-            timerSpy = sinon.spy(file, "_loadStorage");
+            timerSpy = sinon.spy(file.$.ping, "generateRequest");
 
             clock.tick(299999);
             assert(timerSpy.notCalled);
@@ -618,7 +618,7 @@
           var timerSpy;
 
           responseHandler = function(response) {
-            timerSpy = sinon.spy(fileFolder, "_loadStorage");
+            timerSpy = sinon.spy(fileFolder.$.ping, "generateRequest");
 
             clock.tick(299999);
             assert(timerSpy.notCalled);
