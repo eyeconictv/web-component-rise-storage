@@ -351,7 +351,7 @@
 
     _supportsLocalStorage: function() {
       try {
-        return "localStorage" in window && window.localStorage !== null;
+        return "sessionStorage" in window && window.sessionStorage !== null;
       } catch (e) {
         return false;
       }
@@ -403,8 +403,6 @@
         } else {
           if (this._isSubscribed) {
             this._makeStorageRequest();
-          } else {
-            this._fireStorageSubscriptionError();
           }
         }
       }
@@ -426,7 +424,6 @@
     },
 
     _fireStorageSubscriptionError: function() {
-      console.log("Storage Subscription Expired!");
       this.fire("rise-storage-subscription-expired");
     },
 
