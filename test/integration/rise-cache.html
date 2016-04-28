@@ -36,7 +36,7 @@
         server.respondImmediately = true;
         server.respondWith("GET", "http://localhost:9494/ping?callback=_handlePingResponse",
           [200, cacheHeader, "running"]);
-        server.respondWith("GET", "https://store-dot-rvaserver2.appspot.com/v1/company/abc123/product/status?pc=b0cba08a4baa0c62b8cdc621b6f6a124f89a03db",
+        server.respondWith("GET", "https://store-dot-rvaserver2.appspot.com/v1/widget/auth?cid=abc123&pc=b0cba08a4baa0c62b8cdc621b6f6a124f89a03db",
           [200, header, JSON.stringify(subscribedStatus)]);
 
         clock = sinon.useFakeTimers();

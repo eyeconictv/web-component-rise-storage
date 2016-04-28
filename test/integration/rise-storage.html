@@ -43,7 +43,7 @@
         server.respondImmediately = true;
         server.respondWith("GET", "http://localhost:9494/ping?callback=_handlePingResponse",
           [200, cacheHeader, ""]);
-        server.respondWith("GET", "https://store-dot-rvaserver2.appspot.com/v1/company/abc123/product/status?pc=b0cba08a4baa0c62b8cdc621b6f6a124f89a03db",
+        server.respondWith("GET", "https://store-dot-rvaserver2.appspot.com/v1/widget/auth?cid=abc123&pc=b0cba08a4baa0c62b8cdc621b6f6a124f89a03db",
           [200, header, JSON.stringify(subscribedStatus)]);
       });
 
@@ -74,12 +74,42 @@
           responseHandler = function() {
             responded = true;
             assert.isTrue(responded);
+            file.removeEventListener("rise-storage-subscription-expired", responseHandler);
             done();
           };
 
           file.addEventListener("rise-storage-subscription-expired", responseHandler);
-          server.respondWith("GET", "https://store-dot-rvaserver2.appspot.com/v1/company/abc123/product/status?pc=b0cba08a4baa0c62b8cdc621b6f6a124f89a03db",
+          server.respondWith("GET", "https://store-dot-rvaserver2.appspot.com/v1/widget/auth?cid=abc123&pc=b0cba08a4baa0c62b8cdc621b6f6a124f89a03db",
             [200, header, JSON.stringify(expiredStatus)]);
+          file.go();
+        });
+
+        test("should fire rise-storage-subscription-expired if subscription is expired and hasn't passed 24 hours", function(done) {
+          var responded = false;
+          responseHandler = function() {
+            responded = true;
+            assert.isTrue(responded);
+            file.removeEventListener("rise-storage-subscription-expired", responseHandler);
+            done();
+          };
+
+          file.addEventListener("rise-storage-subscription-expired", responseHandler);
+          clock.tick(24*60*60*1000 -1);
+          file.go();
+        });
+
+        test("should return the correct URL for a specific file in a bucket after 24 hours has passed since last check of the subscription status", function(done) {
+          responseHandler = function(response) {
+            assert.equal(response.detail.name, "home.jpg");
+            assert.equal(response.detail.url, "https://www.googleapis.com/storage/v1/b/risemedialibrary-abc123/o/home.jpg?alt=media");
+            done();
+          };
+
+          file.addEventListener("rise-storage-response", responseHandler);
+          server.respondWith([200, header, JSON.stringify(bucketImage)]);
+          server.respondWith("GET", "https://store-dot-rvaserver2.appspot.com/v1/widget/auth?cid=abc123&pc=b0cba08a4baa0c62b8cdc621b6f6a124f89a03db",
+            [200, header, JSON.stringify(subscribedStatus)]);
+          clock.tick(24*60*60*1000 +1);
           file.go();
         });
 

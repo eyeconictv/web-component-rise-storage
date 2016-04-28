@@ -29,6 +29,7 @@ suite("rise-storage", function() {
     };
 
     clock = sinon.useFakeTimers();
+    sessionStorage.clear();
   });
 
   suiteTeardown(function() {
@@ -44,23 +45,12 @@ suite("rise-storage", function() {
   suite("_computeStorageUrl", function() {
     test("should correctly set Storage request URL", function() {
       fileBucket._getStorageSubscription();
-      assert.equal(fileBucket.$.storageSubscription.url, "https://store-dot-rvaserver2.appspot.com/v1/company/abc123/product/status?pc=b0cba08a4baa0c62b8cdc621b6f6a124f89a03db");
-    });
-
-    test("should correctly check that subscription is expired", function() {
-      var expiredResponse = [{"pc":"b0cba08a4baa0c62b8cdc621b6f6a124f89a03db","status":"Trial Expired","expiry":null,"trialPeriod":0}];
-      assert.isTrue(fileBucket._isExpired(expiredResponse));
-    });
-
-    test("should correctly check that subscription is not expired", function() {
-      var expiredResponse = [{"pc":"b0cba08a4baa0c62b8cdc621b6f6a124f89a03db","status":"Subscribed","expiry":null,"trialPeriod":0}];
-      assert.isFalse(fileBucket._isExpired(expiredResponse));
+      assert.equal(fileBucket.$.storageSubscription.url, "https://store-dot-rvaserver2.appspot.com/v1/widget/auth?cid=abc123&pc=b0cba08a4baa0c62b8cdc621b6f6a124f89a03db");
     });
 
     test("should fire rise-storage-subscription-expired if subscription is expired", function(done) {
-      var expiredResponse = { response: [
-            {"pc": "b0cba08a4baa0c62b8cdc621b6f6a124f89a03db", "status": "Trial Expired", "expiry": null, "trialPeriod": 0}
-          ]
+      var expiredResponse = { response:
+            {"authorized":false,"expiry":null,"signatures":null,"error":{"message":"Subscription is not active."}}
         };
       var responded = false;
       var listener = function() {
@@ -76,9 +66,8 @@ suite("rise-storage", function() {
     });
 
     test("should not fire rise-storage-subscription-expired if subscription is not expired", function(done) {
-      var expiredResponse = { response: [
-        {"pc": "b0cba08a4baa0c62b8cdc621b6f6a124f89a03db", "status": "Subscribed", "expiry": null, "trialPeriod": 0}
-      ]
+      var expiredResponse = { response:
+        {"authorized":true,"expiry":"2016-04-26T08:17:59.059+0000","signatures":null,"error":null}
       };
       var responded = false;
       var listener = function() {
