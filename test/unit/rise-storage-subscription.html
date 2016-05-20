@@ -49,6 +49,7 @@ suite("rise-storage", function() {
     });
 
     test("should fire rise-storage-subscription-expired if subscription is expired", function(done) {
+      var startTimerSpy = sinon.spy(fileBucket, "_startTimer");
       var expiredResponse = { response:
             {"authorized":false,"expiry":null,"signatures":null,"error":{"message":"Subscription is not active."}}
         };
@@ -61,7 +62,10 @@ suite("rise-storage", function() {
       fileBucket.addEventListener("rise-storage-subscription-expired", listener);
       fileBucket._handleStorageSubscriptionResponse( null, expiredResponse);
 
+      assert(startTimerSpy.calledOnce);
       assert.isTrue(responded);
+
+      fileBucket._startTimer.restore();
       done();
     });
 
@@ -83,6 +87,7 @@ suite("rise-storage", function() {
     });
 
     test("should fire rise-storage-subscription-error if there is an error on the call to get subscription status", function(done) {
+      var startTimerSpy = sinon.spy(fileBucket, "_startTimer");
       var responded = false;
       var response = {
           "xhr": {
@@ -97,8 +102,10 @@ suite("rise-storage", function() {
 
       fileBucket.addEventListener("rise-storage-subscription-error", listener);
       fileBucket._handleStorageSubscriptionError( {}, response);
-
+      assert(startTimerSpy.calledOnce);
       assert.isTrue(responded);
+
+      fileBucket._startTimer.restore();
       done();
     });
   });
