@@ -46,6 +46,10 @@
           assert.equal(imageFileType._filterByFileType("image/jpeg"), true);
         });
 
+        test("should return true when filtering by image and the content type is a webp", function() {
+          assert.equal(imageFileType._filterByFileType("image/webp"), true);
+        });
+
         test("should return false when filtering by image and the content type is a webm", function() {
           assert.equal(imageFileType._filterByFileType("video/webm"), false);
         });
