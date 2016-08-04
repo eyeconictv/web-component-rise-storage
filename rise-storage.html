@@ -411,7 +411,10 @@
     _makeStorageSusbscriptionRequest: function() {
       if (this.companyid) {
         // Request to Store Authorization API passing company id and product code of the storage subscription
-        var url = "https://store-dot-rvaserver2.appspot.com/v1/widget/auth?cid=" + encodeURIComponent(this.companyid) + "&pc=b0cba08a4baa0c62b8cdc621b6f6a124f89a03db";
+        var productionUrl = "https://store-dot-rvaserver2.appspot.com",
+          testingUrl = "https://store-dot-rvacore-test.appspot.com",
+          serverUrl = (this.env !== "test" ? productionUrl : testingUrl),
+          url = serverUrl + "/v1/widget/auth?cid=" + encodeURIComponent(this.companyid) + "&pc=b0cba08a4baa0c62b8cdc621b6f6a124f89a03db";
         this.$.storageSubscription.url = url;
         this.$.storageSubscription.generateRequest();
       }
