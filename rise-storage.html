@@ -517,6 +517,7 @@
           }
         }
         else if (this._isEmptyFolder(resp.response)) {
+          this._startTimer();
           this.fire("rise-storage-empty-folder");
         }
         else if (this._noFolderExists(resp.response)) {
