@@ -53,6 +53,13 @@
         value: ""
       },
       /**
+       * The ID of the Display.
+       */
+      displayid: {
+        type: String,
+        value: ""
+      },
+      /**
        * The folder name.
        */
       folder: {
@@ -314,6 +321,19 @@
      */
     _isSubscribed: false,
 
+    /**
+     * Stores the mode param value for for flagging that component is running in preview
+     * @property MODE_PREVIEW
+     * @default preview
+     */
+    MODE_PREVIEW: "preview",
+
+    /**
+     * Stores the mode param value for for flagging that component is running in player
+     * @property MODE_PLAYER
+     * @default no-rc
+     */
+    MODE_PLAYER: "no-rc",
 
   /************************************** INITIALIZATION **************************************/
 
@@ -358,6 +378,13 @@
         return false;
       }
      },
+
+    _isPlayerRunning: function() {
+      return this.displayid !== "" &&
+        this.displayid !== "preview" &&
+        this.displayid !== "display_id" &&
+        this.displayid !== "displayId";
+    },
 
     _getCachedSubscriptionStatus: function() {
         return JSON.parse(sessionStorage.getItem(this.LOCAL_STORAGE_NAME+"-"+this.companyid));
@@ -680,7 +707,7 @@
         file = {},
         previousItem = null,
         suffix = "?alt=media",
-        modeSuffix = "&mode=preview",
+        modeSuffix = "&mode=",
         cb = "&cb=" + new Date().getTime(),
         filesFiltered = 0,
         totalFiles = 0;
@@ -726,7 +753,7 @@
                   file.url = self._baseCacheUrl + "?url=" + encodeURIComponent(item.selfLink + suffix);
                 }
                 else if(!self._isOfflinePlayer()) {
-                  file.url = item.selfLink + suffix + modeSuffix;
+                  file.url = item.selfLink + suffix + modeSuffix + ((self._isPlayerRunning()) ? self.MODE_PLAYER : self.MODE_PREVIEW);
                 }
                 else {
                   file.url = item.selfLink;
@@ -746,7 +773,7 @@
                   file.url = self._baseCacheUrl + "cb=" + new Date().getTime() + "?url=" + encodeURIComponent(item.selfLink + suffix);
                 }
                 else if(!self._isOfflinePlayer()) {
-                  file.url = item.selfLink + suffix + cb + modeSuffix;
+                  file.url = item.selfLink + suffix + cb + modeSuffix + ((self._isPlayerRunning()) ? self.MODE_PLAYER : self.MODE_PREVIEW);
                 }
                 else {
                   file.url = item.selfLink;
@@ -1207,7 +1234,7 @@
         startIndex = -1,
         endIndex = -1,
         suffix = "?alt=media",
-        modeSuffix = "&mode=preview";
+        modeSuffix = "&mode=";
 
       // File in the root of the bucket.
       if (response.selfLink) {
@@ -1228,7 +1255,7 @@
         this._fileUrl = encodeURIComponent("https://storage.googleapis.com/" + bucket + "/" + filePath);
       }
       else {
-        this._fileUrl = url + suffix + modeSuffix;
+        this._fileUrl = url + suffix + modeSuffix + ((this._isPlayerRunning()) ? this.MODE_PLAYER : this.MODE_PREVIEW);
       }
     },
 
