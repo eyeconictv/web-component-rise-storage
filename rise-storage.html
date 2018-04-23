@@ -708,6 +708,7 @@
         previousItem = null,
         suffix = "?alt=media",
         modeSuffix = "&mode=",
+        displayIdSuffix = "&displayid=" + this.displayid,
         cb = "&cb=" + new Date().getTime(),
         filesFiltered = 0,
         totalFiles = 0;
@@ -753,7 +754,7 @@
                   file.url = self._baseCacheUrl + "?url=" + encodeURIComponent(item.selfLink + suffix);
                 }
                 else if(!self._isOfflinePlayer()) {
-                  file.url = item.selfLink + suffix + modeSuffix + ((self._isPlayerRunning()) ? self.MODE_PLAYER : self.MODE_PREVIEW);
+                  file.url = item.selfLink + suffix + modeSuffix + ((self._isPlayerRunning()) ? self.MODE_PLAYER : self.MODE_PREVIEW) + displayIdSuffix;
                 }
                 else {
                   file.url = item.selfLink;
@@ -773,7 +774,7 @@
                   file.url = self._baseCacheUrl + "cb=" + new Date().getTime() + "?url=" + encodeURIComponent(item.selfLink + suffix);
                 }
                 else if(!self._isOfflinePlayer()) {
-                  file.url = item.selfLink + suffix + cb + modeSuffix + ((self._isPlayerRunning()) ? self.MODE_PLAYER : self.MODE_PREVIEW);
+                  file.url = item.selfLink + suffix + cb + modeSuffix + ((self._isPlayerRunning()) ? self.MODE_PLAYER : self.MODE_PREVIEW) + displayIdSuffix;
                 }
                 else {
                   file.url = item.selfLink;
@@ -1234,7 +1235,8 @@
         startIndex = -1,
         endIndex = -1,
         suffix = "?alt=media",
-        modeSuffix = "&mode=";
+        modeSuffix = "&mode=",
+        displayIdSuffix = "&displayid=" + this.displayid;
 
       // File in the root of the bucket.
       if (response.selfLink) {
@@ -1255,7 +1257,7 @@
         this._fileUrl = encodeURIComponent("https://storage.googleapis.com/" + bucket + "/" + filePath);
       }
       else {
-        this._fileUrl = url + suffix + modeSuffix + ((this._isPlayerRunning()) ? this.MODE_PLAYER : this.MODE_PREVIEW);
+        this._fileUrl = url + suffix + modeSuffix + ((this._isPlayerRunning()) ? this.MODE_PLAYER : this.MODE_PREVIEW) + displayIdSuffix;
       }
     },
 
