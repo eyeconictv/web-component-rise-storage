@@ -1,5 +1,7 @@
 # Rise Storage Web Component
 
+# This is a legacy version of [rise-storage](https://github.com/Rise-Vision/rise-storage)
+
 ## Introduction
 
 The Rise Storage Web Component uses Google’s Storage API to retrieve the URL of a file, or the URLs of all files within a folder, from Rise Storage. If the Rise Cache application is running, it will be utilized for local storage of the files, and the URLs returned by the web component will point to Rise Cache. Otherwise, if Rise Cache is not running, the browser's cache will be utilized.
