@@ -1,6 +1,6 @@
 {
   "name": "web-component-rise-storage",
-  "version": "1.14.0",
+  "version": "1.14.1",
   "description": "The Rise Storage Web Component uses Google’s storage API to retrieve the URLs of all files in a particular folder, or the URL of a single file in a particular folder, from Rise Storage.",
   "scripts": {
     "test": "gulp test",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Rise-Vision/web-component-rise-storage.git"
+    "url": "https://github.com/eyeconictv/web-component-rise-storage.git"
   },
   "keywords": [
     "polymer",
@@ -20,9 +20,9 @@
   "author": "Rise Vision",
   "license": "GPLv3",
   "bugs": {
-    "url": "https://github.com/Rise-Vision/web-component-rise-storage/issues"
+    "url": "https://github.com/eyeconictv/web-component-rise-storage/issues"
   },
-  "homepage": "https://github.com/Rise-Vision/web-component-rise-storage",
+  "homepage": "https://github.com/eyeconictv/web-component-rise-storage",
   "devDependencies": {
     "gulp": "^3.8.10",
     "gulp-bower": "~0.0.10",

@@ -1,6 +1,6 @@
 {
   "name": "rise-storage",
-  "version": "1.14.0",
+  "version": "1.14.1",
   "authors": [
     "Donna Peplinskie <donna.peplinskie@risevision.com>"
   ],
@@ -11,7 +11,7 @@
     "web-components"
   ],
   "license": "GPLv3",
-  "homepage": "https://github.com/Rise-Vision/web-component-rise-storage",
+  "homepage": "https://github.com/eyeconictv/web-component-rise-storage",
   "ignore": [
     "**/.*",
     "node_modules",
